@@ -1,0 +1,65 @@
+# ============================================================
+# OceanTracerPINN Training Configuration
+# ============================================================
+
+project:
+  name: OceanTracerPINN
+  experiment_id: "experiment1"
+  notes: "Default state of ML framework"
+  tracer: oxygen18
+  seed: 42
+  output_dir: outputs/oxygen18/experiment1
+# ============================================================
+# Dataset
+# ============================================================
+dataset:
+  parquet_file: data/raw/AISIT_Database_1.0.0_uv.parquet
+  target: Delta_O18_[permillle]
+  date_format: "%Y-%m-%d %H:%M:%S"
+  inputs:
+    datetime: "ISO8601_Datetime"
+    temperature: "Temperature_[cel]"
+    salinity: "CTD_Salinity_[dimensionless]"
+    depth: "Combined_Depth_[meters_below_surface]"
+    latitude: "Latitude_[degree_north]"
+    longitude: "Longitude_[degree_east]"
+    u: "u"
+    v: "v"
+
+
+# ============================================================
+# Model
+# ============================================================
+
+model:
+  hidden_dim: 256
+  n_blocks: 4
+  cv_folds: 5
+  holdout_frac: 0.15
+
+# ============================================================
+# Training
+# ============================================================
+
+training:
+  epochs: 500
+  batch_size: 512
+  learning_rate: 0.5e-3
+  weight_decay: 1.0e-5
+  eta_min: 1.0e-6
+
+# ============================================================
+# Validation
+# ============================================================
+validation:
+  mc_samples: 100
+
+# ============================================================
+# Physical Loss Weights
+# ============================================================
+loss:
+  lambda_diap: 0.05
+  lambda_smooth: 0.02
+  lambda_sec: 0.01
+  lambda_strat: 0.05
+  lambda_advect: 0.05

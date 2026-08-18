@@ -10,59 +10,27 @@ def infer_on_model_field(
     model,
     scaler,
     feat_names,
-    target_year=2020,
-    target_month=6,
-    target_time_index=0,
-    temp_var=None,
-    salt_var=None,
-    uvel_var=None,
-    vvel_var=None,  # ← NEW
-    device="cpu",
+    target_year,
+    target_month,
+    device,
+    n_mc,
+    target_time_index=0
 ):
     """
     Run the trained PINN on a gridded ocean model Dataset.
-
-    Extends the original infer_on_model_field to read u and v from the
-    NetCDF and compute the velocity features required by the network.
-
-    Additional parameters
-    ─────────────────────
-    uvel_var : str  name of the u-velocity variable (default: auto-detect)
-    vvel_var : str  name of the v-velocity variable (default: auto-detect)
     """
 
-
-    # ── Candidate variable names ───────────────────────────────────────────────THETA', 'SALT', 'EVEL', 'NVEL', 'WVEL'
-    _TEMP_VARS = ["temp", "temperature", "thetao", "votemper", "potential_temperature","THETA"]
-    _SALT_VARS = ["salinity", "salt", "so", "vosaline", "practical_salinity","SALT"]
-    _UVEL_VARS = [
-        # "u",
-        # "uo",
-        "vxo",
-        "EVEL",
-        # "vozocrtx",
-        # "u_velocity",
-        # "UVEL",
-        # "eastward_sea_water_velocity",
-    ]
-    _VVEL_VARS = [
-        # "v",
-        # "vo",
-        "vyo",
-        "NVEL",
-        # "vomecrty",
-        # "v_velocity",
-        # "VVEL",
-        # "northward_sea_water_velocity",
-    ]
-    _DEPTH_NAMES = ["depth", "deptht", "depthu", "depthv", "Z","z", "lev", "level"]
+    # ── Candidate variable names ───────────────────────────────────────────────
+    _TEMP_VARS = ["temp", "temperature", "thetao", "votemper", "potential_temperature", "THETA"]
+    _SALT_VARS = ["salinity", "salt", "so", "vosaline", "practical_salinity", "SALT"]
+    _UVEL_VARS = ["vxo", "EVEL"]
+    _VVEL_VARS = ["vyo", "NVEL"]
+    _DEPTH_NAMES = ["depth", "deptht", "depthu", "depthv", "Z", "z", "lev", "level"]
     _LAT_NAMES = ["lat", "latitude", "nav_lat", "yt_ocean", "nlat", "y"]
     _LON_NAMES = ["lon", "longitude", "nav_lon", "xt_ocean", "nlon", "x"]
     _TIME_NAMES = ["time", "time_counter", "t", "time_0", "time_centered"]
 
-    def _find_var(ds, candidates, label, override):
-        if override and override in ds:
-            return override
+    def _find_var(ds, candidates, label):
         low = {v.lower(): v for v in ds.data_vars}
         for c in candidates:
             if c.lower() in low:
@@ -88,14 +56,11 @@ def infer_on_model_field(
         return da.transpose(dep_dim, lat_dim, lon_dim).values
 
     # ── Variable detection ────────────────────────────────────────────────────
-    temp_var = _find_var(ds, _TEMP_VARS, "temperature", temp_var)
-    salt_var = _find_var(ds, _SALT_VARS, "salinity", salt_var)
-    uvel_var = _find_var(ds, _UVEL_VARS, "u-velocity", uvel_var)
-    vvel_var = _find_var(ds, _VVEL_VARS, "v-velocity", vvel_var)
-    print(
-        f"  [infer] temp='{temp_var}', salt='{salt_var}', "
-        f"u='{uvel_var}', v='{vvel_var}'"
-    )
+    temp_var = _find_var(ds, _TEMP_VARS, "temperature")
+    salt_var = _find_var(ds, _SALT_VARS, "salinity")
+    uvel_var = _find_var(ds, _UVEL_VARS, "u-velocity")
+    vvel_var = _find_var(ds, _VVEL_VARS, "v-velocity")
+    print(f"  [infer] temp='{temp_var}', salt='{salt_var}', u='{uvel_var}', v='{vvel_var}'")
 
     # ── Dimension detection ───────────────────────────────────────────────────
     ref = ds[temp_var]
@@ -106,10 +71,7 @@ def infer_on_model_field(
     # Handle time
     time_dim = next((d for d in _TIME_NAMES if d in ref.dims), None)
     if time_dim and ref.sizes[time_dim] > 1:
-        print(
-            f"  [infer] Slicing time index {target_time_index} "
-            f"from dim '{time_dim}' (size {ref.sizes[time_dim]})"
-        )
+        print(f"  [infer] Slicing time index {target_time_index} from dim '{time_dim}' (size {ref.sizes[time_dim]})")
         ds = ds.isel({time_dim: target_time_index})
         ref = ds[temp_var]
 
@@ -134,32 +96,23 @@ def infer_on_model_field(
         lat_3d = np.broadcast_to(lat_1d[np.newaxis], temp_3d.shape).copy()
         lon_3d = np.broadcast_to(lon_1d[np.newaxis], temp_3d.shape).copy()
     else:
-        lat_3d = np.broadcast_to(
-            lat_1d[np.newaxis, :, np.newaxis], temp_3d.shape
-        ).copy()
-        lon_3d = np.broadcast_to(
-            lon_1d[np.newaxis, np.newaxis, :], temp_3d.shape
-        ).copy()
+        lat_3d = np.broadcast_to(lat_1d[np.newaxis, :, np.newaxis], temp_3d.shape).copy()
+        lon_3d = np.broadcast_to(lon_1d[np.newaxis, np.newaxis, :], temp_3d.shape).copy()
 
-    depth_3d = np.broadcast_to(
-        depth_vals[:, np.newaxis, np.newaxis], temp_3d.shape
-    ).copy()
+    depth_3d = np.broadcast_to(depth_vals[:, np.newaxis, np.newaxis], temp_3d.shape).copy()
 
-    # 2. Define the Target Polar Stereographic Projection (EPSG:3413)
-    # Central meridian (lon_0) for EPSG:3413 is -45 degrees (Greenland)
+    # ── Define Target Polar Stereographic Projection (EPSG:3413) ──────────────
     lon_0 = -45.0
-
-    # Define coordinate transformer (WGS84 lat-lon to NSIDC Polar Stereographic North)
     transformer = Transformer.from_crs("EPSG:4326", "EPSG:3413", always_xy=True)
     x_grid, y_grid = transformer.transform(lon_3d, lat_3d)
 
-    # 3. Calculate the Grid Convergence Angle (gamma)
-    # Convert angles to radians for numpy trigonometric functions
     gamma = np.radians(lon_3d - lon_0)
 
-    # 4. Perform the Vector Rotation
-    u_3d = u_3d * np.cos(gamma) - v_3d * np.sin(gamma)
-    v_3d = u_3d * np.sin(gamma) + v_3d * np.cos(gamma)
+    # Fixed bug: avoided self-overwriting u_3d before calculating v_3d
+    u_orig = u_3d.copy()
+    v_orig = v_3d.copy()
+    u_3d = u_orig * np.cos(gamma) - v_orig * np.sin(gamma)
+    v_3d = u_orig * np.sin(gamma) + v_orig * np.cos(gamma)
 
     # ── Flatten ───────────────────────────────────────────────────────────────
     T_flat = temp_3d.ravel()
@@ -170,16 +123,6 @@ def infer_on_model_field(
     u_flat = u_3d.ravel()
     v_flat = v_3d.ravel()
 
-    # # rotate velocities
-    # X, Y = u_flat, v_flat
-    # X_src_crs = X / np.cos(lat_f/ 180 * np.pi)
-    # Y_src_crs = Y
-    # magnitude = np.sqrt(X**2 + Y**2)
-    # magn_src_crs = np.sqrt(X_src_crs**2 + Y_src_crs**2)
-    # u_flat = X_src_crs * magnitude / magn_src_crs
-    # v_flat = Y_src_crs * magnitude / magn_src_crs
-
-    # TODO this should be refactored into build features function or inference should be entirely seperate
     # ── TEOS-10 ───────────────────────────────────────────────────────────────
     p_flat = gsw.p_from_z(-z_flat, lat_f)
     SA = gsw.SA_from_SP(S_flat, p_flat, lon_f, lat_f)
@@ -188,7 +131,6 @@ def infer_on_model_field(
     spice = gsw.spiciness0(SA, CT)
     sigma2 = gsw.sigma2(SA, CT)
 
-    # N² proxy (per-point; no cast structure in gridded data)
     alpha = gsw.alpha(SA, CT, p_flat)
     beta = gsw.beta(SA, CT, p_flat)
     rho = gsw.rho(SA, CT, p_flat)
@@ -229,8 +171,7 @@ def infer_on_model_field(
     missing = [f for f in feat_names if f not in feature_map]
     if missing:
         raise ValueError(
-            f"Features {missing} not computed. "
-            f"Add them to feature_map in infer_on_model_field."
+            f"Features {missing} not computed. Add them to feature_map in infer_on_model_field."
         )
 
     X_model = np.column_stack([feature_map[f] for f in feat_names])
@@ -238,45 +179,52 @@ def infer_on_model_field(
     # ── Mask land / ice ───────────────────────────────────────────────────────
     valid = np.isfinite(X_model).all(axis=1)
     n_valid = valid.sum()
-    print(
-        f"  [infer] Valid ocean points: {n_valid:,} / {valid.size:,} "
-        f"({100 * n_valid / valid.size:.1f}%)"
-    )
+    print(f"  [infer] Valid ocean points: {n_valid:,} / {valid.size:,} ({100 * n_valid / valid.size:.1f}%)")
 
     X_valid = scaler.transform(X_model[valid])
 
-    # ── MC-Dropout inference ──────────────────────────────────────────────────
-    model.train()
+    # ── Vectorized MC-Dropout inference ───────────────────────────────────────
+    model.to(device)
+    model.eval()
+    for m in model.modules():
+        if isinstance(m, torch.nn.Dropout):
+            m.train()
 
-    batch_size = 100_000  # tune this (start lower if needed)
-    n_mc = 20  # reduce from 50 → big win
-
+    # Adjusted batch size to account for the n_mc dimension expansion
+    batch_size = 50_000
     n = X_valid.shape[0]
+
     mean = np.zeros(n, dtype=np.float32)
     sq_mean = np.zeros(n, dtype=np.float32)
 
+    dev_type = "cuda" if "cuda" in str(device) else "cpu"
+    use_autocast = "cuda" in str(device) and torch.cuda.is_available()
+
     for i in range(0, n, batch_size):
         X_batch_np = X_valid[i : i + batch_size]
+        curr_batch_len = X_batch_np.shape[0]
 
-        X_batch = torch.tensor(X_batch_np, dtype=torch.float32).to(device)
+        # Transfer batch to device once
+        X_batch = torch.tensor(X_batch_np, dtype=torch.float32, device=device)
 
-        mc_preds = []
+        # Replicate batch n_mc times: shape (n_mc * curr_batch_len, num_features)
+        X_expanded = X_batch.repeat_interleave(n_mc, dim=0)
 
-        for _ in range(n_mc):
-            with torch.no_grad(), torch.cuda.amp.autocast():
-                y = model(X_batch).cpu().numpy()
-            mc_preds.append(y)
+        with torch.no_grad(), torch.amp.autocast(device_type=dev_type, enabled=use_autocast):
+            y_expanded = model(X_expanded)  # (curr_batch_len * n_mc, out_dim)
 
-        mc_preds = np.stack(mc_preds)  # (n_mc, batch)
+        # Reshape to (curr_batch_len, n_mc)
+        mc_preds = y_expanded.view(curr_batch_len, n_mc)
 
-        mean[i : i + batch_size] = mc_preds.mean(axis=0)
-        sq_mean[i : i + batch_size] = (mc_preds**2).mean(axis=0)
+        # Compute statistics directly on GPU, then bring scalar outputs to CPU
+        batch_mean = mc_preds.mean(dim=1)
+        batch_sq_mean = (mc_preds**2).mean(dim=1)
 
-        del X_batch, mc_preds
-        torch.cuda.empty_cache()
+        mean[i : i + curr_batch_len] = batch_mean.cpu().numpy().squeeze()
+        sq_mean[i : i + curr_batch_len] = batch_sq_mean.cpu().numpy().squeeze()
 
     tracer_mean = mean
-    tracer_std = np.sqrt(sq_mean - mean**2)
+    tracer_std = np.sqrt(np.maximum(sq_mean - mean**2, 0.0))
 
     tracer_field = np.full(valid.size, np.nan)
     uncert_field = np.full(valid.size, np.nan)
@@ -290,8 +238,6 @@ def infer_on_model_field(
         lat_dim: ds.coords.get(lat_dim, np.arange(n_lat)),
         lon_dim: ds.coords.get(lon_dim, np.arange(n_lon)),
     }
-
-    import xarray as xr
 
     ds_out = xr.Dataset(
         {

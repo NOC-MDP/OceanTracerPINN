@@ -1,0 +1,24 @@
+/home/users/thopri/micromamba/envs/AISIT2/lib/python3.14/site-packages/torch/cuda/__init__.py:188: UserWarning: CUDA initialization: CUDA driver initialization failed, you might not have a CUDA gpu. (Triggered internally at /__w/pytorch/pytorch/c10/cuda/CUDAFunctions.cpp:119.)
+  return torch._C._cuda_getDeviceCount() > 0
+
+============================================================
+ PINN Tracer Inference — pre-trained model
+============================================================
+  Device       : cpu
+  Checkpoint   : /gws/ssde/j25a/nemo/vol4/thopri/OceanTracerPINN/outputs/oxygen18/experiment1/pinn_oxygen18.pt
+  Ocean model  : /work/scratch-pw5/thopri/cmems_mod_arc_phy_my_topaz4_P1M_multi-vars_180.00W-179.88E_50.00N-90.00N_0.00-4000.00m_1991-01-01-2026-04-01.nc
+  Target time  : 1991-02
+  MC samples   : 100
+  Output dir   : /gws/ssde/j25a/nemo/vol4/thopri/OceanTracerPINN/outputs/inference
+
+── Loading checkpoint ──────────────────────────────────────
+  Checkpoint   : /gws/ssde/j25a/nemo/vol4/thopri/OceanTracerPINN/outputs/oxygen18/experiment1/pinn_oxygen18.pt
+  Architecture : hidden_dim=256, n_blocks=4, n_features=14
+  Features     : ['sigma0', 'spice', 'sigma2', 'log_depth', 'log_n2', 'year_norm', 'season_sin', 'season_cos', 'lat_norm', 'lon_sin', 'lon_cos', 'log_speed', 'flow_sin', 'flow_cos']
+
+── Ocean model inference ────────────────────────────────────
+  Directory : /work/scratch-pw5/thopri/cmems_mod_arc_phy_my_topaz4_P1M_multi-vars_180.00W-179.88E_50.00N-90.00N_0.00-4000.00m_1991-01-01-2026-04-01.nc
+  Target    : 1991-02
+  Nearest time slice selected: 1991-02-01
+  [infer] temp='thetao', salt='so', u='vxo', v='vyo'
+  [infer] Valid ocean points: 13,518,717 / 36,979,200 (36.6%)

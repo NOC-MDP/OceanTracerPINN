@@ -7,7 +7,7 @@ project:
   experiment_id: "experiment1"
   notes: "Default state of ML framework"
   tracer: oxygen18
-  seed: 42
+  seed: 4705749
   output_dir: outputs/oxygen18/experiment1
 # ============================================================
 # Dataset

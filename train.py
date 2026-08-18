@@ -120,7 +120,8 @@ def main(cfg_path):
             f"train n={len(tr_idx):,}  val n={len(val_idx):,}"
         )
 
-        scaler_cv = StandardScaler().fit(X[tr_idx])
+        scaler_cv = StandardScaler()
+        X_cv_scaled = scaler_cv.fit_transform(X)
         model_cv = TracerPINN(
             n_features=len(feat_names),
             hidden_dim=model_cfg['hidden_dim'],
@@ -129,12 +130,11 @@ def main(cfg_path):
 
         model_cv, hist_cv = train_pinn(
             model_cv,
-            X[tr_idx],
+            X_cv_scaled[tr_idx],
             y[tr_idx],
-            X[val_idx],
+            X_cv_scaled[val_idx],
             y[val_idx],
             feat_names,
-            scaler_cv,
             u_tr=u_valid[tr_idx],
             v_tr=v_valid[tr_idx],
             u_val=u_valid[val_idx],
@@ -170,7 +170,9 @@ def main(cfg_path):
 
     # ── 4. Final model (train on all data) ────────────────────────────────────
     log_status("── 4. Training final model on all data ─────────────────────")
-    scaler = StandardScaler().fit(X)
+    # Fit scaler ONCE on unscaled training features
+    scaler = StandardScaler()
+    X_train_scaled = scaler.fit_transform(X)
     model_final = TracerPINN(
         n_features=len(feat_names),
         hidden_dim=model_cfg['hidden_dim'],
@@ -179,12 +181,11 @@ def main(cfg_path):
 
     model_final, history = train_pinn(
         model_final,
-        X,
+        X_train_scaled,
         y,
-        X,
+        X_train_scaled,
         y,  # val == train for final loss monitoring only
         feat_names,
-        scaler,
         u_tr=u_valid,
         v_tr=v_valid,
         u_val=u_valid,
@@ -221,7 +222,7 @@ def main(cfg_path):
 
     # ── 5. Diagnostics ────────────────────────────────────────────────────────
     log_status("── 5. Diagnostics ──────────────────────────────────────────")
-    X_sc = scaler.transform(X)
+    X_sc = scaler.fit_transform(X)
     y_pred_mn, y_pred_sd = predict_with_uncertainty(
         model_final,
         X_sc,

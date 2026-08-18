@@ -18,7 +18,7 @@ START_TIME = time.time()
 # ---------------------------------------------------------
 def log_status(message):
     elapsed = time.time() - START_TIME
-    log_status(f"[{elapsed:6.1f}s] {message}",flush=True)
+    print(f"[{elapsed:6.1f}s] {message}",flush=True)
 
 def load_config(path):
     with open(path,"r") as f:
@@ -79,7 +79,7 @@ def parse_date_column(df, date_col, date_format='%Y-%m-%d %H:%M:%S'):
         }
     )
     log_status(f"  Date format used : {fmt_used}")
-    log_status(f"  Parse sample — verify month/day order is correct:")
+    log_status("  Parse sample — verify month/day order is correct:")
     log_status(sample.to_string(index=False))
     log_status("")
     return df

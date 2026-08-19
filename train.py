@@ -222,7 +222,7 @@ def main(cfg_path):
 
     # ── 5. Diagnostics ────────────────────────────────────────────────────────
     log_status("── 5. Diagnostics ──────────────────────────────────────────")
-    X_sc = scaler.fit_transform(X)
+    X_sc = scaler.transform(X)
     y_pred_mn, y_pred_sd = predict_with_uncertainty(
         model_final,
         X_sc,

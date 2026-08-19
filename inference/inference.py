@@ -131,11 +131,33 @@ def infer_on_model_field(
     spice = gsw.spiciness0(SA, CT)
     sigma2 = gsw.sigma2(SA, CT)
 
+    # ── N² proxy / stratification feature ────────────────────────────────
     alpha = gsw.alpha(SA, CT, p_flat)
     beta = gsw.beta(SA, CT, p_flat)
     rho = gsw.rho(SA, CT, p_flat)
-    n2_proxy = np.maximum(9.7963 / rho * rho * (alpha + beta) / 100.0, 1e-8)
-    log_n2 = np.log10(n2_proxy)
+
+    REF_DEPTH_SCALE = 100.0
+    N2_EPSILON = 1e-8
+
+    n2_raw = (
+        (9.7963 / rho)
+        * (alpha + beta)
+        / REF_DEPTH_SCALE
+    )
+
+    n2_clean = np.nan_to_num(
+        n2_raw,
+        nan=N2_EPSILON,
+        posinf=N2_EPSILON,
+        neginf=N2_EPSILON,
+    )
+
+    n2 = np.maximum(
+        n2_clean,
+        N2_EPSILON
+    )
+
+    log_n2 = np.log10(n2)
 
     # ── Velocity features ─────────────────────────────────────────────────────
     eps_v = 1e-10
@@ -181,6 +203,36 @@ def infer_on_model_field(
     n_valid = valid.sum()
     print(f"  [infer] Valid ocean points: {n_valid:,} / {valid.size:,} ({100 * n_valid / valid.size:.1f}%)")
 
+    print("\n========== INFERENCE FEATURE DIAGNOSTICS ==========")
+
+    print("Feature names:")
+    for i, name in enumerate(feat_names):
+        print(
+            f"  {i:2d}: {name:20s} "
+            f"raw min={np.nanmin(X_model[:, i]):12.5g} "
+            f"max={np.nanmax(X_model[:, i]):12.5g} "
+            f"mean={np.nanmean(X_model[:, i]):12.5g} "
+            f"std={np.nanstd(X_model[:, i]):12.5g}"
+        )
+
+    X_scaled = scaler.transform(X_model[valid])
+
+    print("\nScaled features:")
+    for i, name in enumerate(feat_names):
+        print(
+            f"  {i:2d}: {name:20s} "
+            f"min={np.nanmin(X_scaled[:, i]):12.5g} "
+            f"max={np.nanmax(X_scaled[:, i]):12.5g} "
+            f"mean={np.nanmean(X_scaled[:, i]):12.5g} "
+            f"std={np.nanstd(X_scaled[:, i]):12.5g}"
+        )
+
+    print("\nScaler:")
+    print("  mean :", scaler.mean_)
+    print("  scale:", scaler.scale_)
+
+    print("====================================================\n")
+
     X_valid = scaler.transform(X_model[valid])
 
     # ── Vectorized MC-Dropout inference ───────────────────────────────────────
@@ -222,6 +274,23 @@ def infer_on_model_field(
 
         mean[i : i + curr_batch_len] = batch_mean.cpu().numpy().squeeze()
         sq_mean[i : i + curr_batch_len] = batch_sq_mean.cpu().numpy().squeeze()
+
+        if i == 0:
+            y_test = (
+                y_expanded
+                .detach()
+                .float()
+                .cpu()
+                .numpy()
+                .squeeze()
+            )
+
+            print("\n========== MODEL OUTPUT CHECK ==========")
+            print(f"min  = {np.nanmin(y_test):.6f}")
+            print(f"max  = {np.nanmax(y_test):.6f}")
+            print(f"mean = {np.nanmean(y_test):.6f}")
+            print(f"std  = {np.nanstd(y_test):.6f}")
+            print("========================================")
 
     tracer_mean = mean
     tracer_std = np.sqrt(np.maximum(sq_mean - mean**2, 0.0))

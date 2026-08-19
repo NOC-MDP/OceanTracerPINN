@@ -1,0 +1,81 @@
+
+============================================================
+ PINN Tracer Inference — pre-trained model
+============================================================
+  Device       : cuda
+  Checkpoint   : /gws/ssde/j25a/nemo/vol4/thopri/OceanTracerPINN/outputs/oxygen18/experiment1/pinn_oxygen18.pt
+  Ocean model  : /work/scratch-pw5/thopri/cmems_mod_arc_phy_my_topaz4_P1M_multi-vars_180.00W-179.88E_50.00N-90.00N_0.00-4000.00m_1991-01-01-2026-04-01.nc
+  Target time  : 1994-09
+  MC samples   : 100
+  Output dir   : /gws/ssde/j25a/nemo/vol4/thopri/OceanTracerPINN/outputs/inference
+
+── Loading checkpoint ──────────────────────────────────────
+  Checkpoint   : /gws/ssde/j25a/nemo/vol4/thopri/OceanTracerPINN/outputs/oxygen18/experiment1/pinn_oxygen18.pt
+  Architecture : hidden_dim=256, n_blocks=4, n_features=14
+  Features     : ['sigma0', 'spice', 'sigma2', 'log_depth', 'log_n2', 'year_norm', 'season_sin', 'season_cos', 'lat_norm', 'lon_sin', 'lon_cos', 'log_speed', 'flow_sin', 'flow_cos']
+
+── Ocean model inference ────────────────────────────────────
+  Directory : /work/scratch-pw5/thopri/cmems_mod_arc_phy_my_topaz4_P1M_multi-vars_180.00W-179.88E_50.00N-90.00N_0.00-4000.00m_1991-01-01-2026-04-01.nc
+  Target    : 1994-09
+  Nearest time slice selected: 1994-09-01
+  [infer] temp='thetao', salt='so', u='vxo', v='vyo'
+  [infer] Valid ocean points: 13,518,970 / 36,979,200 (36.6%)
+
+========== INFERENCE FEATURE DIAGNOSTICS ==========
+Feature names:
+   0: sigma0               raw min=      2.9502 max=      28.158 mean=      26.809 std=      1.8513
+   1: spice                raw min=     -20.865 max=      2.7062 mean=    -0.92776 std=       1.732
+   2: sigma2               raw min=      11.998 max=      37.491 mean=      36.121 std=      1.8125
+   3: log_depth            raw min=           0 max=      8.2943 mean=      5.1823 std=      2.0679
+   4: log_n2               raw min=          -8 max=     -7.0317 mean=     -7.6696 std=     0.43531
+   5: year_norm            raw min=     0.45283 max=     0.45283 mean=     0.45283 std=           0
+   6: season_sin           raw min=          -1 max=          -1 mean=          -1 std=           0
+   7: season_cos           raw min=  -1.837e-16 max=  -1.837e-16 mean=  -1.837e-16 std=  2.4652e-32
+   8: lat_norm             raw min=     0.76604 max=           1 mean=     0.92061 std=     0.07039
+   9: lon_sin              raw min=          -1 max=           1 mean=  7.3784e-19 std=     0.70711
+  10: lon_cos              raw min=          -1 max=           1 mean=  1.8864e-17 std=     0.70711
+  11: log_speed            raw min=  2.6844e-07 max=     0.37434 mean=    0.029212 std=       0.029
+  12: flow_sin             raw min=          -1 max=           1 mean=   -0.030833 std=     0.43743
+  13: flow_cos             raw min=          -1 max=           1 mean=    0.010929 std=     0.41613
+
+Scaled features:
+   0: sigma0               min=     -8.8366 max=     0.98063 mean=     0.45516 std=     0.72096
+   1: spice                min=     -8.4747 max=      2.1117 mean=     0.47959 std=     0.77785
+   2: sigma2               min=     -9.0786 max=     0.99188 mean=     0.45039 std=     0.71598
+   3: log_depth            min=     -2.6658 max=      2.0066 mean=   -0.067908 std=      1.1306
+   4: log_n2               min=     -1.9291 max=      5.1324 mean=     0.11998 std=      1.1969
+   5: year_norm            min=     -1.0305 max=     -1.0305 mean=     -1.0305 std=  2.2204e-16
+   6: season_sin           min=    -0.68458 max=    -0.68458 mean=    -0.68458 std=  1.1102e-16
+   7: season_cos           min=     0.62736 max=     0.62736 mean=     0.62736 std=  1.1102e-16
+   8: lat_norm             min=     -6.0967 max=      1.3931 mean=     0.24845 std=      1.7412
+   9: lon_sin              min=     -1.3036 max=       2.413 mean=     0.43948 std=      1.2077
+  10: lon_cos              min=    -0.95011 max=      1.8136 mean=     0.56357 std=      1.0384
+  11: log_speed            min=    -0.55068 max=      12.189 mean=     0.44347 std=     0.98694
+  12: flow_sin             min=     -2.6696 max=      2.8411 mean=    -0.14667 std=      1.9848
+  13: flow_cos             min=     -1.4552 max=      1.3161 mean=   -0.028122 std=     0.95311
+
+Scaler:
+  mean : [ 2.56404195e+01 -1.99561522e+00  3.49803883e+01  4.73226155e+00
+ -7.09785376e+00  6.57564292e-01 -6.99490436e-01 -2.99694543e-01
+  9.56743695e-01 -2.98489116e-01 -3.12431518e-01  1.61812048e-02
+ -3.11072317e-02  5.01891282e-02]
+  scale: [2.56774538 2.22660291 2.53150134 1.77520492 0.01288538 0.19866668
+ 0.4389689  0.47770558 0.03104935 0.53812981 0.72367611 0.02938378
+ 0.36293074 0.72166122]
+====================================================
+
+
+========== MODEL OUTPUT CHECK ==========
+min  = -16.500000
+max  = 0.408936
+mean = -0.888704
+std  = 2.086414
+========================================
+  Saved NetCDF: /gws/ssde/j25a/nemo/vol4/thopri/OceanTracerPINN/outputs/inference/tracer_predicted_1994_09.nc
+  Saved: /gws/ssde/j25a/nemo/vol4/thopri/OceanTracerPINN/outputs/inference/model_10m_map_1994_09.png
+  Saved: /gws/ssde/j25a/nemo/vol4/thopri/OceanTracerPINN/outputs/inference/model_zonal_mean_1994_09.png
+
+============================================================
+  All outputs written to: /gws/ssde/j25a/nemo/vol4/thopri/OceanTracerPINN/outputs/inference/
+============================================================
+

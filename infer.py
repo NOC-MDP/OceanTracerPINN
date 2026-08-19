@@ -14,8 +14,8 @@ from models.architecture import TracerPINN
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 
-cfg = {"model_year": 1991,
-    "model_month": 2,
+cfg = {"model_year": 1994,
+    "model_month": 9,
     "seed": 42,
     "nc_path":"/work/scratch-pw5/thopri/cmems_mod_arc_phy_my_topaz4_P1M_multi-vars_180.00W-179.88E_50.00N-90.00N_0.00-4000.00m_1991-01-01-2026-04-01.nc",
     "output_dir": "/gws/ssde/j25a/nemo/vol4/thopri/OceanTracerPINN/outputs/inference",

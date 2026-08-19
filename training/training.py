@@ -2,7 +2,6 @@ import torch
 import pandas as pd
 from ocean.dataset import TracerDataset
 from models.loss import physics_losses
-from models.loss import AdaptivePINNLoss
 
 import torch.nn as nn
 

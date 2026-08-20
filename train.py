@@ -54,8 +54,6 @@ def main(cfg_path):
     log_status("Physics loss weights:")
     log_status(f"    lambda_diap   = {loss_cfg['lambda_diap']}")
     log_status(f"    lambda_smooth = {loss_cfg['lambda_smooth']}")
-    log_status(f"    lambda_sec    = {loss_cfg['lambda_sec']}")
-    log_status(f"    lambda_strat  = {loss_cfg['lambda_strat']}")
     log_status(f"    lambda_advect = {loss_cfg['lambda_advect']}")
     log_status("")
 
@@ -121,7 +119,10 @@ def main(cfg_path):
         )
 
         scaler_cv = StandardScaler()
-        X_cv_scaled = scaler_cv.fit_transform(X)
+
+        X_tr_scaled = scaler_cv.fit_transform(X[tr_idx])
+        X_val_scaled = scaler_cv.transform(X[val_idx])
+
         model_cv = TracerPINN(
             n_features=len(feat_names),
             hidden_dim=model_cfg['hidden_dim'],
@@ -130,9 +131,9 @@ def main(cfg_path):
 
         model_cv, hist_cv = train_pinn(
             model_cv,
-            X_cv_scaled[tr_idx],
+            X_tr_scaled,
             y[tr_idx],
-            X_cv_scaled[val_idx],
+            X_val_scaled,
             y[val_idx],
             feat_names,
             u_tr=u_valid[tr_idx],
@@ -146,8 +147,6 @@ def main(cfg_path):
             lr=training_cfg['learning_rate'],
             lambda_diap=loss_cfg['lambda_diap'],
             lambda_smooth=loss_cfg['lambda_smooth'],
-            lambda_sec=loss_cfg['lambda_sec'],
-            lambda_strat=loss_cfg['lambda_strat'],
             lambda_advect=loss_cfg['lambda_advect'],
             device=device,
         )
@@ -197,8 +196,6 @@ def main(cfg_path):
         lr=training_cfg['learning_rate'],
         lambda_diap=loss_cfg['lambda_diap'],
         lambda_smooth=loss_cfg['lambda_smooth'],
-        lambda_sec=loss_cfg['lambda_sec'],
-        lambda_strat=loss_cfg['lambda_strat'],
         lambda_advect=loss_cfg['lambda_advect'],
         device=device,
     )
@@ -320,7 +317,6 @@ if __name__ == "__main__":
     parser.add_argument(
         "--config",
         type=str,
-        default="config/default.yml",
         help="Path to YAML configuration file"
     )
     args = parser.parse_args()

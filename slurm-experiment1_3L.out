@@ -1,0 +1,154 @@
+[   1.4s] Loading config from: config/experiments/train1.yml
+[   1.6s] ============================================================
+[   1.6s]  PINN Conservative Tracer Inference
+[   1.6s] ============================================================
+[   1.6s]   Device       : cuda
+[   1.6s]   Obs file     : data/raw/AISIT_Database_1.0.0_uv.parquet
+[   1.6s]   Tracer col   : Delta_O18_[permillle]
+[   1.6s]   Datetime col   : ISO8601_Datetime
+[   1.6s]   Velocity cols: u='u', v='v'
+[   1.6s]   Epochs       : 500
+[   1.6s]   Output dir   : outputs/oxygen18/experiment1
+[   1.6s]   Training Data Holdout   : 0.15
+[   1.6s] Physics loss weights:
+[   1.6s]     lambda_diap   = 0.05
+[   1.6s]     lambda_smooth = 0.02
+[   1.6s]     lambda_advect = 0.05
+[   1.6s] 
+[   1.6s] ── 1. Loading observations ─────────────────────────────────
+[   1.9s]   Date format used : %Y-%m-%d %H:%M:%S
+[   1.9s]   Parse sample — verify month/day order is correct:
+[   1.9s]                 raw     parsed  year  month
+2016-06-09 17:25:00 2016-06-09  2016      6
+2016-06-09 17:33:00 2016-06-09  2016      6
+2016-06-09 17:34:00 2016-06-09  2016      6
+2016-06-09 17:38:00 2016-06-09  2016      6
+[   1.9s] 
+[   1.9s]   Loaded 45,737 rows, 34,498 after dropping NaNs
+[   1.9s] 
+── Dataset summary ────────────────────────────────────────
+[   1.9s]   Observations : 34,498
+[   1.9s]   Year range   : 1967-12-01 00:00:00 - 2025-05-19 23:01:00
+[   1.9s]   Depth range  : 0.0 - 4451.0 m
+[   1.9s]   Tracer range : -27.910 - 2.310
+[   1.9s]   Lat range    : 60.0 - 90.0 deg
+[   1.9s]   Lon range    : -179.9 - 180.0 deg
+[   1.9s]   Temperature range : -2.9 - 17.6 degC
+[   1.9s]   Salinity range    : 0.0 - 35.9
+[   1.9s]   Speed range  : 0.0000 - 0.5034 m/s (mean 0.0272)
+[   1.9s] 
+  Obs per decade:
+[   1.9s]     1960s      33  
+[   1.9s]     1970s     641  ███
+[   1.9s]     1980s   1,859  ██████████
+[   1.9s]     1990s   5,041  █████████████████████████████
+[   1.9s]     2000s  10,864  ███████████████████████████████████████████████████████████████
+[   1.9s]     2010s  13,383  █████████████████████████████████████████████████████████████████████████████
+[   1.9s]     2020s   2,677  ███████████████
+[   1.9s] 
+[   1.9s] ── 2. Engineering features (TEOS-10 + velocity) ────────────
+  Speed range : 0.0000 – 0.5034 m/s  (mean 0.0180)
+[   2.0s]   Features : ['sigma0', 'spice', 'log_depth', 'lat_norm', 'lon_sin', 'lon_cos', 'log_speed', 'flow_sin', 'flow_cos']
+[   2.0s]   Valid obs: 34,498
+[   2.0s] ── 2b. Carving out holdout test set (15%) ──
+[   2.0s]   Train+CV pool : 29,532 obs (years <= 2017)
+[   2.0s]   Held-out test : 4,966 obs (years >  2017)
+[   2.0s]   This test set is not touched again until Step 5b.
+
+[   2.0s] ── 3. Temporal CV (5 folds) ───────────────────────────
+[   2.0s]   [Fold 1/5]  train n=151  val n=1,705
+  [  0] data=0.7183  phys=3.61806  val RMSE=1.2446  R²=-0.037 LR=5.00e-04 
+  [ 50] data=0.1945  phys=1.49281  val RMSE=1.4847  R²=-0.475 LR=4.87e-04 
+  [100] data=0.2166  phys=0.29522  val RMSE=1.4523  R²=-0.411 LR=4.51e-04 
+  [150] data=0.1760  phys=0.39330  val RMSE=1.3738  R²=-0.263 LR=3.96e-04 
+  [200] data=0.0896  phys=0.04036  val RMSE=1.2286  R²=-0.010 LR=3.26e-04 
+  [250] data=0.0777  phys=0.14890  val RMSE=1.3005  R²=-0.132 LR=2.49e-04 
+  [300] data=0.0683  phys=0.02714  val RMSE=1.3077  R²=-0.144 LR=1.72e-04 
+  [350] data=0.0593  phys=0.04930  val RMSE=1.2728  R²=-0.084 LR=1.03e-04 
+  [400] data=0.0581  phys=0.00526  val RMSE=1.2538  R²=-0.052 LR=4.77e-05 
+  [450] data=0.0526  phys=0.00427  val RMSE=1.2476  R²=-0.042 LR=1.27e-05 
+[  27.8s]   [Fold 2/5]  train n=1,856  val n=1,529
+  [  0] data=1.0337  phys=54.56775  val RMSE=1.2399  R²=-0.177 LR=5.00e-04 
+  [ 50] data=0.0962  phys=0.00622  val RMSE=1.0225  R²=0.199 LR=4.87e-04 
+  [100] data=0.0614  phys=0.00483  val RMSE=0.7696  R²=0.547 LR=4.51e-04 
+  [150] data=0.0554  phys=0.00392  val RMSE=0.8524  R²=0.444 LR=3.96e-04 
+  [200] data=0.0414  phys=0.00344  val RMSE=0.8732  R²=0.416 LR=3.26e-04 
+  [250] data=0.0369  phys=0.00336  val RMSE=0.8524  R²=0.444 LR=2.49e-04 
+  [300] data=0.0401  phys=0.00633  val RMSE=0.8368  R²=0.464 LR=1.72e-04 
+  [350] data=0.0328  phys=0.00304  val RMSE=0.7699  R²=0.546 LR=1.03e-04 
+  [400] data=0.0290  phys=0.00356  val RMSE=0.7721  R²=0.544 LR=4.77e-05 
+  [450] data=0.0302  phys=0.00314  val RMSE=0.7934  R²=0.518 LR=1.27e-05 
+[ 120.7s]   [Fold 3/5]  train n=3,385  val n=4,941
+  [  0] data=1.4911  phys=27.58577  val RMSE=2.9435  R²=-0.588 LR=5.00e-04 
+  [ 50] data=0.0705  phys=0.00569  val RMSE=1.1018  R²=0.777 LR=4.87e-04 
+  [100] data=0.0514  phys=0.00437  val RMSE=1.1785  R²=0.745 LR=4.51e-04 
+  [150] data=0.0388  phys=0.00388  val RMSE=1.5480  R²=0.561 LR=3.96e-04 
+  [200] data=0.0340  phys=0.00330  val RMSE=1.4420  R²=0.619 LR=3.26e-04 
+  [250] data=0.0473  phys=0.00369  val RMSE=1.4712  R²=0.603 LR=2.49e-04 
+  [300] data=0.0319  phys=0.00296  val RMSE=1.6603  R²=0.495 LR=1.72e-04 
+  [350] data=0.0284  phys=0.00268  val RMSE=1.7590  R²=0.433 LR=1.03e-04 
+  [400] data=0.0264  phys=0.00263  val RMSE=1.8610  R²=0.365 LR=4.77e-05 
+  [450] data=0.0261  phys=0.00257  val RMSE=1.8560  R²=0.369 LR=1.27e-05 
+[ 282.9s]   [Fold 4/5]  train n=8,326  val n=9,320
+  [  0] data=0.9230  phys=28.87998  val RMSE=1.5121  R²=-0.428 LR=5.00e-04 
+  [ 50] data=0.0542  phys=0.00454  val RMSE=0.5395  R²=0.818 LR=4.87e-04 
+  [100] data=0.0428  phys=0.00374  val RMSE=0.5550  R²=0.808 LR=4.51e-04 
+  [150] data=0.0344  phys=0.00289  val RMSE=0.5358  R²=0.821 LR=3.96e-04 
+  [200] data=0.0349  phys=0.00371  val RMSE=0.5191  R²=0.832 LR=3.26e-04 
+  [250] data=0.0283  phys=0.00810  val RMSE=0.5286  R²=0.826 LR=2.49e-04 
+  [300] data=0.0271  phys=0.00661  val RMSE=0.5434  R²=0.816 LR=1.72e-04 
+  [350] data=0.0242  phys=0.02767  val RMSE=0.5372  R²=0.820 LR=1.03e-04 
+  [400] data=0.0221  phys=0.00347  val RMSE=0.5383  R²=0.819 LR=4.77e-05 
+  [450] data=0.0211  phys=0.00267  val RMSE=0.5372  R²=0.820 LR=1.27e-05 
+[ 675.5s]   [Fold 5/5]  train n=17,646  val n=11,886
+  [  0] data=0.7518  phys=10.31587  val RMSE=1.6473  R²=-0.647 LR=5.00e-04 
+  [ 50] data=0.0465  phys=0.00380  val RMSE=0.7830  R²=0.628 LR=4.87e-04 
+  [100] data=0.0397  phys=0.00420  val RMSE=0.7915  R²=0.620 LR=4.51e-04 
+  [150] data=0.0367  phys=0.03233  val RMSE=0.8195  R²=0.592 LR=3.96e-04 
+  [200] data=0.0347  phys=0.00811  val RMSE=0.8300  R²=0.582 LR=3.26e-04 
+  [250] data=0.0324  phys=0.00297  val RMSE=0.8987  R²=0.510 LR=2.49e-04 
+  [300] data=0.0292  phys=0.00774  val RMSE=0.8803  R²=0.530 LR=1.72e-04 
+  [350] data=0.0275  phys=0.00300  val RMSE=0.9189  R²=0.488 LR=1.03e-04 
+  [400] data=0.0256  phys=0.00347  val RMSE=0.9163  R²=0.491 LR=4.77e-05 
+  [450] data=0.0249  phys=0.00375  val RMSE=0.9165  R²=0.490 LR=1.27e-05 
+[1482.3s]   Saved: outputs/oxygen18/experiment1/cv_results.csv
+[1482.3s] ── Temporal CV results ────────────────────────────────────
+[1482.3s]   Fold 1  train 1967-1974  val 1976-1983  R2=-0.037  RMSE=1.2447  N_val=1705
+[1482.3s]   Fold 2  train 1967-1983  val 1984-1991  R2=0.531  RMSE=0.7823  N_val=1529
+[1482.3s]   Fold 3  train 1967-1991  val 1992-2000  R2=0.354  RMSE=1.8779  N_val=4941
+[1482.3s]   Fold 4  train 1967-2000  val 2001-2008  R2=0.817  RMSE=0.5412  N_val=9320
+[1482.3s]   Fold 5  train 1967-2008  val 2009-2017  R2=0.486  RMSE=0.9202  N_val=11886
+[1482.3s]   Mean R2: 0.430 +/- 0.278
+[1482.3s] 
+[1482.3s] ── 4. Training final model on all data ─────────────────────
+  [  0] data=0.5389  phys=4.44740  val RMSE=0.9202  R²=0.642 LR=5.00e-04 
+  [ 50] data=0.0732  phys=0.01259  val RMSE=0.3870  R²=0.937 LR=4.87e-04 
+  [100] data=0.0571  phys=0.01010  val RMSE=0.3560  R²=0.946 LR=4.51e-04 
+  [150] data=0.0553  phys=0.00745  val RMSE=0.3430  R²=0.950 LR=3.96e-04 
+  [200] data=0.0479  phys=0.00590  val RMSE=0.3241  R²=0.956 LR=3.26e-04 
+  [250] data=0.0524  phys=0.00973  val RMSE=0.3388  R²=0.951 LR=2.49e-04 
+  [300] data=0.0502  phys=0.00931  val RMSE=0.3319  R²=0.953 LR=1.72e-04 
+  [350] data=0.0490  phys=0.00639  val RMSE=0.3299  R²=0.954 LR=1.03e-04 
+  [400] data=0.0497  phys=0.01234  val RMSE=0.3304  R²=0.954 LR=4.77e-05 
+  [450] data=0.0453  phys=0.02266  val RMSE=0.3165  R²=0.958 LR=1.27e-05 
+  Saved: outputs/oxygen18/experiment1/training_history.png
+[2823.3s]   Saved model: outputs/oxygen18/experiment1/pinn_oxygen18.pt
+[2823.3s] ── 5. Diagnostics ──────────────────────────────────────────
+[2824.3s]   Saved: outputs/oxygen18/experiment1/predictions.csv
+[2824.3s]   In-sample RMSE       : 0.3169
+[2824.3s]   In-sample R2         : 0.958
+[2824.3s]   Mean uncertainty (1s): 0.0797
+[2826.2s]   Saved: outputs/oxygen18/experiment1/ts_diagram_check.png
+[2826.8s]   Saved: outputs/oxygen18/experiment1/residual_diagnostics.png
+[2827.9s]   Saved: outputs/oxygen18/experiment1/uncertainty_vs_depth.png
+[2827.9s] 
+── 5b. Held-out test evaluation ─────────────────────────────
+[2828.0s]   Held-out RMSE : 0.5758
+[2828.0s]   Held-out R2   : 0.831
+[2828.0s]   Compare to in-sample R2 above (0.958) — a large gap flags overfitting.
+[2828.1s]   Saved: outputs/oxygen18/experiment1/predictions_heldout_test.csv
+  Saved: outputs/oxygen18/experiment1/residuals_vs_speed.png
+[2828.5s] ============================================================
+[2828.5s]   All outputs written to: outputs/oxygen18/experiment1/
+[2828.5s] ============================================================
+

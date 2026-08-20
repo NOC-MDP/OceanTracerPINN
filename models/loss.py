@@ -44,7 +44,6 @@ def physics_losses(model, x_batch, feature_names, u_raw, v_raw):
 
     dC_dsig = grads[:, idx["sigma0"]]
     dC_dspi = grads[:, idx["spice"]]
-    dC_dyr = grads[:, idx["year_norm"]]
     dC_dlat = grads[:, idx["lat_norm"]]
 
     # Longitude derivative
@@ -53,8 +52,6 @@ def physics_losses(model, x_batch, feature_names, u_raw, v_raw):
     dC_dlon_sin = grads[:, idx["lon_sin"]]
     dC_dlon_cos = grads[:, idx["lon_cos"]]
     dC_dlon = (dC_dlon_sin * lon_cos) - (dC_dlon_cos * lon_sin)
-
-    log_n2 = x_batch[:, idx["log_n2"]]
 
     # ── L1: Diapycnal ─────────────────────────────────────────────────────────
     denom_sig = torch.clamp(dC_dsig.detach() ** 2, min=eps)
@@ -70,12 +67,6 @@ def physics_losses(model, x_batch, feature_names, u_raw, v_raw):
 
     L_smooth = (d2C_dsig2**2).mean()
 
-    # ── L3: Secular ───────────────────────────────────────────────────────────
-    L_secular = (torch.clamp(dC_dyr.abs() - 3.0, min=0) ** 2).mean()
-
-    # ── L4: Stratification ────────────────────────────────────────────────────
-    w_mix = torch.sigmoid(-log_n2)
-    L_strat = (w_mix.detach() * dC_dsig**2).mean()
 
     # ── L5: Advection ─────────────────────────────────────────────────────────
     # Replace raw u, v NaNs with 0.0 just in case
@@ -97,8 +88,6 @@ def physics_losses(model, x_batch, feature_names, u_raw, v_raw):
     losses = {
         "L_diapycnal": L_diapycnal,
         "L_smooth": L_smooth,
-        "L_secular": L_secular,
-        "L_strat": L_strat,
         "L_advect": L_advect,
     }
 
@@ -106,4 +95,4 @@ def physics_losses(model, x_batch, feature_names, u_raw, v_raw):
         if torch.isnan(val):
             print(f"⚠️ NaN isolated in specific loss term: {name}", file=sys.stderr)
 
-    return L_diapycnal, L_smooth, L_secular, L_strat, L_advect
+    return L_diapycnal, L_smooth, L_advect

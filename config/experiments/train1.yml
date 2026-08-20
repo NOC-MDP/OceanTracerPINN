@@ -42,7 +42,7 @@ model:
 # ============================================================
 
 training:
-  epochs: 500
+  epochs: 100
   batch_size: 512
   learning_rate: 0.5e-3
   weight_decay: 1.0e-5
@@ -60,6 +60,4 @@ validation:
 loss:
   lambda_diap: 0.05
   lambda_smooth: 0.02
-  lambda_sec: 0.01
-  lambda_strat: 0.05
   lambda_advect: 0.05

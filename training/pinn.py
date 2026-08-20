@@ -23,8 +23,6 @@ def train_pinn(
     lr,
     lambda_diap,
     lambda_smooth,
-    lambda_sec,
-    lambda_strat,
     lambda_advect,
     device="cpu",
 ):
@@ -70,7 +68,7 @@ def train_pinn(
             L_dat = huber(yp, yb)
 
             # Physics losses
-            Ld, Ls, Lt, Lstr, Ladv = physics_losses(
+            Ld, Ls, Ladv = physics_losses(
                 model,
                 Xb,
                 feat_names,
@@ -81,8 +79,6 @@ def train_pinn(
             L_phys = (
                 lambda_diap * Ld
                 + lambda_smooth * Ls
-                + lambda_sec * Lt
-                + lambda_strat * Lstr
                 + (lambda_advect * Ladv)
             )
 

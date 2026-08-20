@@ -4,6 +4,68 @@ import numpy as np
 from pyproj import Transformer
 import xarray as xr
 import torch
+import os
+from models.architecture import TracerPINN
+from sklearn.preprocessing import StandardScaler
+
+def load_checkpoint(path, device):
+    """
+    Load a .pt checkpoint saved by main.py and reconstruct the model + scaler.
+
+    Checkpoint schema (written by main.py):
+        model_state   : nn.Module state_dict
+        feat_names    : list[str]
+        hidden_dim    : int
+        n_blocks      : int
+        n_features    : int
+        scaler_mean   : np.ndarray
+        scaler_scale  : np.ndarray
+    """
+    if not os.path.isfile(path):
+        sys.exit(f"[ERROR] Checkpoint not found: {path}")
+
+    ckpt = torch.load(path, weights_only=False, map_location=device)
+
+    required_keys = {
+        "model_state",
+        "feat_names",
+        "hidden_dim",
+        "n_blocks",
+        "n_features",
+        "scaler_mean",
+        "scaler_scale",
+    }
+    missing = required_keys - set(ckpt.keys())
+    if missing:
+        sys.exit(
+            f"[ERROR] Checkpoint is missing keys: {missing}\n"
+            f"        Make sure you are loading a checkpoint saved by main.py."
+        )
+
+    # Reconstruct model
+    model = TracerPINN(
+        n_features=ckpt["n_features"],
+        hidden_dim=ckpt["hidden_dim"],
+        n_blocks=ckpt["n_blocks"],
+    ).to(device)
+    model.load_state_dict(ckpt["model_state"])
+    model.eval()
+
+    # Reconstruct scaler (sklearn StandardScaler shell, no re-fitting needed)
+    scaler = StandardScaler()
+    scaler.mean_ = ckpt["scaler_mean"]
+    scaler.scale_ = ckpt["scaler_scale"]
+    scaler.n_features_in_ = ckpt["n_features"]
+
+    feat_names = ckpt["feat_names"]
+
+    print(f"  Checkpoint   : {path}")
+    print(
+        f"  Architecture : hidden_dim={ckpt['hidden_dim']}, "
+        f"n_blocks={ckpt['n_blocks']}, n_features={ckpt['n_features']}"
+    )
+    print(f"  Features     : {feat_names}")
+    return model, scaler, feat_names
 
 def infer_on_model_field(
     ds,

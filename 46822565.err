@@ -1,0 +1,6 @@
+/home/users/thopri/micromamba/envs/AISIT2/lib/python3.14/site-packages/distributed/client.py:3398: UserWarning: Sending large graph of size 17.95 MiB.
+This may cause some slowdown.
+Consider loading the data with Dask directly
+ or using futures or delayed objects to embed the data into the graph without repetition.
+See also https://docs.dask.org/en/stable/best-practices.html#load-data-with-dask for more information.
+  warnings.warn(

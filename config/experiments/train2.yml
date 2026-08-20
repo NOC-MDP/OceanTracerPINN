@@ -4,11 +4,11 @@
 
 project:
   name: OceanTracerPINN
-  experiment_id: "experiment1"
-  notes: "Default state of ML framework"
+  experiment_id: "experiment2"
+  notes: "New ResidualBlock Arch using SiLU rather than GELU layers."
   tracer: oxygen18
   seed: 4705749
-  output_dir: outputs/oxygen18/experiment1
+  output_dir: outputs/oxygen18/experiment2
 # ============================================================
 # Dataset
 # ============================================================

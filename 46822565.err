@@ -1,7 +1,0 @@
-/home/users/thopri/micromamba/envs/AISIT2/lib/python3.14/site-packages/distributed/client.py:3398: UserWarning: Sending large graph of size 17.95 MiB.
-This may cause some slowdown.
-Consider loading the data with Dask directly
- or using futures or delayed objects to embed the data into the graph without repetition.
-See also https://docs.dask.org/en/stable/best-practices.html#load-data-with-dask for more information.
-  warnings.warn(
-[2026-08-20T16:36:54.861] error: *** JOB 46822565 ON host1202 CANCELLED AT 2026-08-20T16:36:54 DUE to SIGNAL Terminated ***

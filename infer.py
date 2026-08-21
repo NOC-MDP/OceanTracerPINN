@@ -87,7 +87,7 @@ def main(cfg_path,model_year,model_month):
     )
 
     # ── Save NetCDF ───────────────────────────────────────────────────────────
-    nc_out = os.path.join(cfg['output_dir'], f"tracer_predicted_{model_year}_{model_month:02d}.nc")
+    nc_out = os.path.join(cfg['output_dir'], f"netcdf/tracer_predicted_{model_year}_{model_month:02d}.nc")
     ds_out.to_netcdf(nc_out)
     log_status(f"  Saved NetCDF: {nc_out}")
 
@@ -143,7 +143,7 @@ def main(cfg_path,model_year,model_month):
 
     plt.tight_layout()
 
-    map_path = os.path.join(cfg['output_dir'], f"model_10m_map_{model_year}_{model_month:02d}.png")
+    map_path = os.path.join(cfg['output_dir'], f"images/model_10m_map_{model_year}_{model_month:02d}.png")
     plt.savefig(map_path, dpi=150)
     plt.close()
 
@@ -174,7 +174,7 @@ def main(cfg_path,model_year,model_month):
         axes[1].set_title("Zonal-mean uncertainty σ")
         plt.tight_layout()
         xsec_path = os.path.join(
-            cfg['output_dir'], f"model_zonal_mean_{model_year}_{model_month:02d}.png"
+            cfg['output_dir'], f"images/model_zonal_mean_{model_year}_{model_month:02d}.png"
         )
         plt.savefig(xsec_path, dpi=150)
         plt.close()

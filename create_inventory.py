@@ -13,12 +13,12 @@ import glob
 
 cfg = {
     "work_dir":"/gws/ssde/j25a/nemo/vol4/thopri/OceanTracerPINN",
-    "mw_output_path" : "outputs/inventory/netcdf/arctic_meteoric_inventory_FRAM_2004_2024.nc",
-    "sim_output_path" : "outputs/inventory/netcdf/arctic_seaicemelt_inventory_FRAM_2004_2024.nc",
-    "frac_output_path" : "outputs/inventory/netcdf/arctic_fractions_FRAM_2004_2024.nc",
+    "mw_output_path" : "outputs/inventory/netcdf/arctic_meteoric_inventory_FRAM_2005_2023.nc",
+    "sim_output_path" : "outputs/inventory/netcdf/arctic_seaicemelt_inventory_FRAM_2005_2023.nc",
+    "frac_output_path" : "outputs/inventory/netcdf/arctic_fractions_FRAM_2005_2023.nc",
     "ML_model_dir": "outputs/inference_fram/netcdf",
-    "inventory_start": 2004,
-    "inventory_end": 2024,
+    "inventory_start": 2005,
+    "inventory_end": 2023,
     "inference_target": "/gws/ssde/j25a/nemo/vol4/thopri/OceanTracerPINN/FramStrait_adjusted_v_fulldepth.nc",
     "salinity": "SA",
     "depth": "depth",

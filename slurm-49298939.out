@@ -1,0 +1,548 @@
+Running inference for Year: 2004, Month: 01
+[   0.6s] Loading config from: config/inference/infer_BSO.yml
+[   0.8s] 
+============================================================
+[   0.8s]  PINN Tracer Inference
+[   0.8s] ============================================================
+[   0.8s]   Device       : cuda
+[   0.8s]   Checkpoint   : /gws/ssde/j25a/nemo/vol4/thopri/OceanTracerPINN/outputs/oxygen18/experiment2/pinn_oxygen18.pt
+[   0.8s]   Ocean model  : BarentsSeaOpening_adjusted_v_fulldepth.nc
+[   0.8s]   Target time  : 2004-01
+[   0.8s]   MC samples   : 100
+[   0.8s]   Output dir   : /gws/ssde/j25a/nemo/vol4/thopri/OceanTracerPINN/outputs/inference_BSO
+[   0.8s]   Seed         : 42
+[   0.8s] 
+[   0.8s] ── Loading checkpoint ──────────────────────────────────────
+  Checkpoint   : /gws/ssde/j25a/nemo/vol4/thopri/OceanTracerPINN/outputs/oxygen18/experiment2/pinn_oxygen18.pt
+  Architecture : hidden_dim=256, n_blocks=4, n_features=9
+  Features     : ['sigma0', 'spice', 'log_depth', 'lat_norm', 'lon_sin', 'lon_cos', 'log_speed', 'flow_sin', 'flow_cos']
+[   1.0s] 
+── Ocean model inference ────────────────────────────────────
+[   1.0s]   Directory : BarentsSeaOpening_adjusted_v_fulldepth.nc
+[   1.0s]   Target    : 2004-01
+[   1.5s]   Nearest time slice selected: 2004-10-15
+  [infer] Valid ocean points: 14,007 / 37,332 (37.5%)
+
+========== INFERENCE FEATURE DIAGNOSTICS ==========
+Feature names:
+   0: sigma0               raw min=      26.516 max=       27.98 mean=      27.593 std=     0.24807
+   1: spice                raw min=     -1.4125 max=      1.0676 mean=     0.48316 std=     0.49872
+   2: log_depth            raw min=           0 max=      6.1841 mean=      5.1774 std=      1.0246
+   3: lat_norm             raw min=     0.93656 max=     0.97704 mean=     0.95842 std=    0.011742
+   4: lon_sin              raw min=     0.31475 max=     0.34704 mean=     0.33093 std=   0.0093422
+   5: lon_cos              raw min=     0.93785 max=     0.94917 mean=      0.9436 std=   0.0032766
+   6: log_speed            raw min=  5.1204e-06 max=      0.1847 mean=    0.027452 std=    0.024147
+   7: flow_sin             raw min=     -0.4486 max=     0.44649 mean=  -0.0034246 std=     0.26435
+   8: flow_cos             raw min=    -0.90855 max=     0.90752 mean=   0.0042721 std=     0.55253
+
+Scaled features:
+   0: sigma0               min=     0.34105 max=      0.9111 mean=     0.76029 std=    0.096609
+   1: spice                min=     0.26188 max=      1.3757 mean=      1.1133 std=     0.22398
+   2: log_depth            min=     -2.6658 max=     0.81787 mean=     -0.1451 std=     0.67949
+   3: lat_norm             min=    -0.65013 max=     0.65361 mean=  -0.0081523 std=     0.29516
+   4: lon_sin              min=      1.1396 max=      1.1996 mean=      1.1729 std=    0.013607
+   5: lon_cos              min=      1.7277 max=      1.7433 mean=      1.7348 std=   0.0035454
+   6: log_speed            min=    -0.55051 max=      5.7352 mean=     0.38356 std=     0.82178
+   7: flow_sin             min=     -1.1503 max=      1.3159 mean=    0.060562 std=      1.1889
+   8: flow_cos             min=     -1.3285 max=       1.188 mean=   -0.053769 std=      1.2499
+
+Scaler:
+  mean : [ 2.56404195e+01 -1.99561522e+00  4.73226155e+00  9.56743695e-01
+ -2.98489116e-01 -3.12431518e-01  1.61812048e-02 -3.11072317e-02
+  5.01891282e-02]
+  scale: [2.56774538 2.22660291 1.77520492 0.03104935 0.53812981 0.72367611
+ 0.02938378 0.36293074 0.72166122]
+====================================================
+
+
+========== MODEL OUTPUT CHECK ==========
+min  = -0.535645
+max  = 0.881348
+mean = 0.254825
+std  = 0.081763
+========================================
+Traceback (most recent call last):
+  File "/gws/ssde/j25a/nemo/vol4/thopri/OceanTracerPINN/infer.py", line 208, in <module>
+    main(cfg_path=args.config,model_year=args.year,model_month=args.month)
+    ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/gws/ssde/j25a/nemo/vol4/thopri/OceanTracerPINN/infer.py", line 78, in main
+    ds_out = infer_on_model_field(
+        cfg,
+    ...<7 lines>...
+        n_mc=cfg['mc_samples']
+    )
+  File "/gws/ssde/j25a/nemo/vol4/thopri/OceanTracerPINN/inference/inference.py", line 403, in infer_on_model_field
+    if temp_3d.ndim == 2 and temp_3d.sizes[cfg['lat_dim']] == 1:
+                             ^^^^^^^^^^^^^
+AttributeError: 'numpy.ndarray' object has no attribute 'sizes'. Did you mean: 'size'?
+ERROR: Inference failed for Year: 2004, Month: 01 — skipping.
+Running inference for Year: 2004, Month: 02
+[   0.5s] Loading config from: config/inference/infer_BSO.yml
+[   0.7s] 
+============================================================
+[   0.7s]  PINN Tracer Inference
+[   0.7s] ============================================================
+[   0.7s]   Device       : cuda
+[   0.7s]   Checkpoint   : /gws/ssde/j25a/nemo/vol4/thopri/OceanTracerPINN/outputs/oxygen18/experiment2/pinn_oxygen18.pt
+[   0.7s]   Ocean model  : BarentsSeaOpening_adjusted_v_fulldepth.nc
+[   0.7s]   Target time  : 2004-02
+[   0.7s]   MC samples   : 100
+[   0.7s]   Output dir   : /gws/ssde/j25a/nemo/vol4/thopri/OceanTracerPINN/outputs/inference_BSO
+[   0.7s]   Seed         : 42
+[   0.7s] 
+[   0.7s] ── Loading checkpoint ──────────────────────────────────────
+  Checkpoint   : /gws/ssde/j25a/nemo/vol4/thopri/OceanTracerPINN/outputs/oxygen18/experiment2/pinn_oxygen18.pt
+  Architecture : hidden_dim=256, n_blocks=4, n_features=9
+  Features     : ['sigma0', 'spice', 'log_depth', 'lat_norm', 'lon_sin', 'lon_cos', 'log_speed', 'flow_sin', 'flow_cos']
+[   1.0s] 
+── Ocean model inference ────────────────────────────────────
+[   1.0s]   Directory : BarentsSeaOpening_adjusted_v_fulldepth.nc
+[   1.0s]   Target    : 2004-02
+[   1.3s]   Nearest time slice selected: 2004-10-15
+  [infer] Valid ocean points: 14,007 / 37,332 (37.5%)
+
+========== INFERENCE FEATURE DIAGNOSTICS ==========
+Feature names:
+   0: sigma0               raw min=      26.516 max=       27.98 mean=      27.593 std=     0.24807
+   1: spice                raw min=     -1.4125 max=      1.0676 mean=     0.48316 std=     0.49872
+   2: log_depth            raw min=           0 max=      6.1841 mean=      5.1774 std=      1.0246
+   3: lat_norm             raw min=     0.93656 max=     0.97704 mean=     0.95842 std=    0.011742
+   4: lon_sin              raw min=     0.31475 max=     0.34704 mean=     0.33093 std=   0.0093422
+   5: lon_cos              raw min=     0.93785 max=     0.94917 mean=      0.9436 std=   0.0032766
+   6: log_speed            raw min=  5.1204e-06 max=      0.1847 mean=    0.027452 std=    0.024147
+   7: flow_sin             raw min=     -0.4486 max=     0.44649 mean=  -0.0034246 std=     0.26435
+   8: flow_cos             raw min=    -0.90855 max=     0.90752 mean=   0.0042721 std=     0.55253
+
+Scaled features:
+   0: sigma0               min=     0.34105 max=      0.9111 mean=     0.76029 std=    0.096609
+   1: spice                min=     0.26188 max=      1.3757 mean=      1.1133 std=     0.22398
+   2: log_depth            min=     -2.6658 max=     0.81787 mean=     -0.1451 std=     0.67949
+   3: lat_norm             min=    -0.65013 max=     0.65361 mean=  -0.0081523 std=     0.29516
+   4: lon_sin              min=      1.1396 max=      1.1996 mean=      1.1729 std=    0.013607
+   5: lon_cos              min=      1.7277 max=      1.7433 mean=      1.7348 std=   0.0035454
+   6: log_speed            min=    -0.55051 max=      5.7352 mean=     0.38356 std=     0.82178
+   7: flow_sin             min=     -1.1503 max=      1.3159 mean=    0.060562 std=      1.1889
+   8: flow_cos             min=     -1.3285 max=       1.188 mean=   -0.053769 std=      1.2499
+
+Scaler:
+  mean : [ 2.56404195e+01 -1.99561522e+00  4.73226155e+00  9.56743695e-01
+ -2.98489116e-01 -3.12431518e-01  1.61812048e-02 -3.11072317e-02
+  5.01891282e-02]
+  scale: [2.56774538 2.22660291 1.77520492 0.03104935 0.53812981 0.72367611
+ 0.02938378 0.36293074 0.72166122]
+====================================================
+
+
+========== MODEL OUTPUT CHECK ==========
+min  = -0.535645
+max  = 0.881348
+mean = 0.254825
+std  = 0.081763
+========================================
+Traceback (most recent call last):
+  File "/gws/ssde/j25a/nemo/vol4/thopri/OceanTracerPINN/infer.py", line 208, in <module>
+    main(cfg_path=args.config,model_year=args.year,model_month=args.month)
+    ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/gws/ssde/j25a/nemo/vol4/thopri/OceanTracerPINN/infer.py", line 78, in main
+    ds_out = infer_on_model_field(
+        cfg,
+    ...<7 lines>...
+        n_mc=cfg['mc_samples']
+    )
+  File "/gws/ssde/j25a/nemo/vol4/thopri/OceanTracerPINN/inference/inference.py", line 403, in infer_on_model_field
+    if temp_3d.ndim == 2 and temp_3d.sizes[cfg['lat_dim']] == 1:
+                             ^^^^^^^^^^^^^
+AttributeError: 'numpy.ndarray' object has no attribute 'sizes'. Did you mean: 'size'?
+ERROR: Inference failed for Year: 2004, Month: 02 — skipping.
+Running inference for Year: 2004, Month: 03
+[   0.5s] Loading config from: config/inference/infer_BSO.yml
+[   0.8s] 
+============================================================
+[   0.8s]  PINN Tracer Inference
+[   0.8s] ============================================================
+[   0.8s]   Device       : cuda
+[   0.8s]   Checkpoint   : /gws/ssde/j25a/nemo/vol4/thopri/OceanTracerPINN/outputs/oxygen18/experiment2/pinn_oxygen18.pt
+[   0.8s]   Ocean model  : BarentsSeaOpening_adjusted_v_fulldepth.nc
+[   0.8s]   Target time  : 2004-03
+[   0.8s]   MC samples   : 100
+[   0.8s]   Output dir   : /gws/ssde/j25a/nemo/vol4/thopri/OceanTracerPINN/outputs/inference_BSO
+[   0.8s]   Seed         : 42
+[   0.8s] 
+[   0.8s] ── Loading checkpoint ──────────────────────────────────────
+  Checkpoint   : /gws/ssde/j25a/nemo/vol4/thopri/OceanTracerPINN/outputs/oxygen18/experiment2/pinn_oxygen18.pt
+  Architecture : hidden_dim=256, n_blocks=4, n_features=9
+  Features     : ['sigma0', 'spice', 'log_depth', 'lat_norm', 'lon_sin', 'lon_cos', 'log_speed', 'flow_sin', 'flow_cos']
+[   1.0s] 
+── Ocean model inference ────────────────────────────────────
+[   1.0s]   Directory : BarentsSeaOpening_adjusted_v_fulldepth.nc
+[   1.0s]   Target    : 2004-03
+[   1.3s]   Nearest time slice selected: 2004-10-15
+  [infer] Valid ocean points: 14,007 / 37,332 (37.5%)
+
+========== INFERENCE FEATURE DIAGNOSTICS ==========
+Feature names:
+   0: sigma0               raw min=      26.516 max=       27.98 mean=      27.593 std=     0.24807
+   1: spice                raw min=     -1.4125 max=      1.0676 mean=     0.48316 std=     0.49872
+   2: log_depth            raw min=           0 max=      6.1841 mean=      5.1774 std=      1.0246
+   3: lat_norm             raw min=     0.93656 max=     0.97704 mean=     0.95842 std=    0.011742
+   4: lon_sin              raw min=     0.31475 max=     0.34704 mean=     0.33093 std=   0.0093422
+   5: lon_cos              raw min=     0.93785 max=     0.94917 mean=      0.9436 std=   0.0032766
+   6: log_speed            raw min=  5.1204e-06 max=      0.1847 mean=    0.027452 std=    0.024147
+   7: flow_sin             raw min=     -0.4486 max=     0.44649 mean=  -0.0034246 std=     0.26435
+   8: flow_cos             raw min=    -0.90855 max=     0.90752 mean=   0.0042721 std=     0.55253
+
+Scaled features:
+   0: sigma0               min=     0.34105 max=      0.9111 mean=     0.76029 std=    0.096609
+   1: spice                min=     0.26188 max=      1.3757 mean=      1.1133 std=     0.22398
+   2: log_depth            min=     -2.6658 max=     0.81787 mean=     -0.1451 std=     0.67949
+   3: lat_norm             min=    -0.65013 max=     0.65361 mean=  -0.0081523 std=     0.29516
+   4: lon_sin              min=      1.1396 max=      1.1996 mean=      1.1729 std=    0.013607
+   5: lon_cos              min=      1.7277 max=      1.7433 mean=      1.7348 std=   0.0035454
+   6: log_speed            min=    -0.55051 max=      5.7352 mean=     0.38356 std=     0.82178
+   7: flow_sin             min=     -1.1503 max=      1.3159 mean=    0.060562 std=      1.1889
+   8: flow_cos             min=     -1.3285 max=       1.188 mean=   -0.053769 std=      1.2499
+
+Scaler:
+  mean : [ 2.56404195e+01 -1.99561522e+00  4.73226155e+00  9.56743695e-01
+ -2.98489116e-01 -3.12431518e-01  1.61812048e-02 -3.11072317e-02
+  5.01891282e-02]
+  scale: [2.56774538 2.22660291 1.77520492 0.03104935 0.53812981 0.72367611
+ 0.02938378 0.36293074 0.72166122]
+====================================================
+
+
+========== MODEL OUTPUT CHECK ==========
+min  = -0.535645
+max  = 0.881348
+mean = 0.254825
+std  = 0.081763
+========================================
+Traceback (most recent call last):
+  File "/gws/ssde/j25a/nemo/vol4/thopri/OceanTracerPINN/infer.py", line 208, in <module>
+    main(cfg_path=args.config,model_year=args.year,model_month=args.month)
+    ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/gws/ssde/j25a/nemo/vol4/thopri/OceanTracerPINN/infer.py", line 78, in main
+    ds_out = infer_on_model_field(
+        cfg,
+    ...<7 lines>...
+        n_mc=cfg['mc_samples']
+    )
+  File "/gws/ssde/j25a/nemo/vol4/thopri/OceanTracerPINN/inference/inference.py", line 403, in infer_on_model_field
+    if temp_3d.ndim == 2 and temp_3d.sizes[cfg['lat_dim']] == 1:
+                             ^^^^^^^^^^^^^
+AttributeError: 'numpy.ndarray' object has no attribute 'sizes'. Did you mean: 'size'?
+ERROR: Inference failed for Year: 2004, Month: 03 — skipping.
+Running inference for Year: 2004, Month: 04
+[   0.5s] Loading config from: config/inference/infer_BSO.yml
+[   1.0s] 
+============================================================
+[   1.0s]  PINN Tracer Inference
+[   1.0s] ============================================================
+[   1.0s]   Device       : cuda
+[   1.0s]   Checkpoint   : /gws/ssde/j25a/nemo/vol4/thopri/OceanTracerPINN/outputs/oxygen18/experiment2/pinn_oxygen18.pt
+[   1.0s]   Ocean model  : BarentsSeaOpening_adjusted_v_fulldepth.nc
+[   1.0s]   Target time  : 2004-04
+[   1.0s]   MC samples   : 100
+[   1.0s]   Output dir   : /gws/ssde/j25a/nemo/vol4/thopri/OceanTracerPINN/outputs/inference_BSO
+[   1.0s]   Seed         : 42
+[   1.0s] 
+[   1.0s] ── Loading checkpoint ──────────────────────────────────────
+  Checkpoint   : /gws/ssde/j25a/nemo/vol4/thopri/OceanTracerPINN/outputs/oxygen18/experiment2/pinn_oxygen18.pt
+  Architecture : hidden_dim=256, n_blocks=4, n_features=9
+  Features     : ['sigma0', 'spice', 'log_depth', 'lat_norm', 'lon_sin', 'lon_cos', 'log_speed', 'flow_sin', 'flow_cos']
+[   1.2s] 
+── Ocean model inference ────────────────────────────────────
+[   1.2s]   Directory : BarentsSeaOpening_adjusted_v_fulldepth.nc
+[   1.2s]   Target    : 2004-04
+[   1.6s]   Nearest time slice selected: 2004-10-15
+  [infer] Valid ocean points: 14,007 / 37,332 (37.5%)
+
+========== INFERENCE FEATURE DIAGNOSTICS ==========
+Feature names:
+   0: sigma0               raw min=      26.516 max=       27.98 mean=      27.593 std=     0.24807
+   1: spice                raw min=     -1.4125 max=      1.0676 mean=     0.48316 std=     0.49872
+   2: log_depth            raw min=           0 max=      6.1841 mean=      5.1774 std=      1.0246
+   3: lat_norm             raw min=     0.93656 max=     0.97704 mean=     0.95842 std=    0.011742
+   4: lon_sin              raw min=     0.31475 max=     0.34704 mean=     0.33093 std=   0.0093422
+   5: lon_cos              raw min=     0.93785 max=     0.94917 mean=      0.9436 std=   0.0032766
+   6: log_speed            raw min=  5.1204e-06 max=      0.1847 mean=    0.027452 std=    0.024147
+   7: flow_sin             raw min=     -0.4486 max=     0.44649 mean=  -0.0034246 std=     0.26435
+   8: flow_cos             raw min=    -0.90855 max=     0.90752 mean=   0.0042721 std=     0.55253
+
+Scaled features:
+   0: sigma0               min=     0.34105 max=      0.9111 mean=     0.76029 std=    0.096609
+   1: spice                min=     0.26188 max=      1.3757 mean=      1.1133 std=     0.22398
+   2: log_depth            min=     -2.6658 max=     0.81787 mean=     -0.1451 std=     0.67949
+   3: lat_norm             min=    -0.65013 max=     0.65361 mean=  -0.0081523 std=     0.29516
+   4: lon_sin              min=      1.1396 max=      1.1996 mean=      1.1729 std=    0.013607
+   5: lon_cos              min=      1.7277 max=      1.7433 mean=      1.7348 std=   0.0035454
+   6: log_speed            min=    -0.55051 max=      5.7352 mean=     0.38356 std=     0.82178
+   7: flow_sin             min=     -1.1503 max=      1.3159 mean=    0.060562 std=      1.1889
+   8: flow_cos             min=     -1.3285 max=       1.188 mean=   -0.053769 std=      1.2499
+
+Scaler:
+  mean : [ 2.56404195e+01 -1.99561522e+00  4.73226155e+00  9.56743695e-01
+ -2.98489116e-01 -3.12431518e-01  1.61812048e-02 -3.11072317e-02
+  5.01891282e-02]
+  scale: [2.56774538 2.22660291 1.77520492 0.03104935 0.53812981 0.72367611
+ 0.02938378 0.36293074 0.72166122]
+====================================================
+
+
+========== MODEL OUTPUT CHECK ==========
+min  = -0.535645
+max  = 0.881348
+mean = 0.254825
+std  = 0.081763
+========================================
+Traceback (most recent call last):
+  File "/gws/ssde/j25a/nemo/vol4/thopri/OceanTracerPINN/infer.py", line 208, in <module>
+    main(cfg_path=args.config,model_year=args.year,model_month=args.month)
+    ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/gws/ssde/j25a/nemo/vol4/thopri/OceanTracerPINN/infer.py", line 78, in main
+    ds_out = infer_on_model_field(
+        cfg,
+    ...<7 lines>...
+        n_mc=cfg['mc_samples']
+    )
+  File "/gws/ssde/j25a/nemo/vol4/thopri/OceanTracerPINN/inference/inference.py", line 403, in infer_on_model_field
+    if temp_3d.ndim == 2 and temp_3d.sizes[cfg['lat_dim']] == 1:
+                             ^^^^^^^^^^^^^
+AttributeError: 'numpy.ndarray' object has no attribute 'sizes'. Did you mean: 'size'?
+ERROR: Inference failed for Year: 2004, Month: 04 — skipping.
+Running inference for Year: 2004, Month: 05
+[   0.5s] Loading config from: config/inference/infer_BSO.yml
+[   0.7s] 
+============================================================
+[   0.7s]  PINN Tracer Inference
+[   0.7s] ============================================================
+[   0.7s]   Device       : cuda
+[   0.7s]   Checkpoint   : /gws/ssde/j25a/nemo/vol4/thopri/OceanTracerPINN/outputs/oxygen18/experiment2/pinn_oxygen18.pt
+[   0.7s]   Ocean model  : BarentsSeaOpening_adjusted_v_fulldepth.nc
+[   0.7s]   Target time  : 2004-05
+[   0.7s]   MC samples   : 100
+[   0.7s]   Output dir   : /gws/ssde/j25a/nemo/vol4/thopri/OceanTracerPINN/outputs/inference_BSO
+[   0.7s]   Seed         : 42
+[   0.7s] 
+[   0.7s] ── Loading checkpoint ──────────────────────────────────────
+  Checkpoint   : /gws/ssde/j25a/nemo/vol4/thopri/OceanTracerPINN/outputs/oxygen18/experiment2/pinn_oxygen18.pt
+  Architecture : hidden_dim=256, n_blocks=4, n_features=9
+  Features     : ['sigma0', 'spice', 'log_depth', 'lat_norm', 'lon_sin', 'lon_cos', 'log_speed', 'flow_sin', 'flow_cos']
+[   0.9s] 
+── Ocean model inference ────────────────────────────────────
+[   0.9s]   Directory : BarentsSeaOpening_adjusted_v_fulldepth.nc
+[   0.9s]   Target    : 2004-05
+[   1.3s]   Nearest time slice selected: 2004-10-15
+  [infer] Valid ocean points: 14,007 / 37,332 (37.5%)
+
+========== INFERENCE FEATURE DIAGNOSTICS ==========
+Feature names:
+   0: sigma0               raw min=      26.516 max=       27.98 mean=      27.593 std=     0.24807
+   1: spice                raw min=     -1.4125 max=      1.0676 mean=     0.48316 std=     0.49872
+   2: log_depth            raw min=           0 max=      6.1841 mean=      5.1774 std=      1.0246
+   3: lat_norm             raw min=     0.93656 max=     0.97704 mean=     0.95842 std=    0.011742
+   4: lon_sin              raw min=     0.31475 max=     0.34704 mean=     0.33093 std=   0.0093422
+   5: lon_cos              raw min=     0.93785 max=     0.94917 mean=      0.9436 std=   0.0032766
+   6: log_speed            raw min=  5.1204e-06 max=      0.1847 mean=    0.027452 std=    0.024147
+   7: flow_sin             raw min=     -0.4486 max=     0.44649 mean=  -0.0034246 std=     0.26435
+   8: flow_cos             raw min=    -0.90855 max=     0.90752 mean=   0.0042721 std=     0.55253
+
+Scaled features:
+   0: sigma0               min=     0.34105 max=      0.9111 mean=     0.76029 std=    0.096609
+   1: spice                min=     0.26188 max=      1.3757 mean=      1.1133 std=     0.22398
+   2: log_depth            min=     -2.6658 max=     0.81787 mean=     -0.1451 std=     0.67949
+   3: lat_norm             min=    -0.65013 max=     0.65361 mean=  -0.0081523 std=     0.29516
+   4: lon_sin              min=      1.1396 max=      1.1996 mean=      1.1729 std=    0.013607
+   5: lon_cos              min=      1.7277 max=      1.7433 mean=      1.7348 std=   0.0035454
+   6: log_speed            min=    -0.55051 max=      5.7352 mean=     0.38356 std=     0.82178
+   7: flow_sin             min=     -1.1503 max=      1.3159 mean=    0.060562 std=      1.1889
+   8: flow_cos             min=     -1.3285 max=       1.188 mean=   -0.053769 std=      1.2499
+
+Scaler:
+  mean : [ 2.56404195e+01 -1.99561522e+00  4.73226155e+00  9.56743695e-01
+ -2.98489116e-01 -3.12431518e-01  1.61812048e-02 -3.11072317e-02
+  5.01891282e-02]
+  scale: [2.56774538 2.22660291 1.77520492 0.03104935 0.53812981 0.72367611
+ 0.02938378 0.36293074 0.72166122]
+====================================================
+
+
+========== MODEL OUTPUT CHECK ==========
+min  = -0.535645
+max  = 0.881348
+mean = 0.254825
+std  = 0.081763
+========================================
+Traceback (most recent call last):
+  File "/gws/ssde/j25a/nemo/vol4/thopri/OceanTracerPINN/infer.py", line 208, in <module>
+    main(cfg_path=args.config,model_year=args.year,model_month=args.month)
+    ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/gws/ssde/j25a/nemo/vol4/thopri/OceanTracerPINN/infer.py", line 78, in main
+    ds_out = infer_on_model_field(
+        cfg,
+    ...<7 lines>...
+        n_mc=cfg['mc_samples']
+    )
+  File "/gws/ssde/j25a/nemo/vol4/thopri/OceanTracerPINN/inference/inference.py", line 403, in infer_on_model_field
+    if temp_3d.ndim == 2 and temp_3d.sizes[cfg['lat_dim']] == 1:
+                             ^^^^^^^^^^^^^
+AttributeError: 'numpy.ndarray' object has no attribute 'sizes'. Did you mean: 'size'?
+ERROR: Inference failed for Year: 2004, Month: 05 — skipping.
+Running inference for Year: 2004, Month: 06
+[   0.5s] Loading config from: config/inference/infer_BSO.yml
+[   0.7s] 
+============================================================
+[   0.7s]  PINN Tracer Inference
+[   0.7s] ============================================================
+[   0.7s]   Device       : cuda
+[   0.7s]   Checkpoint   : /gws/ssde/j25a/nemo/vol4/thopri/OceanTracerPINN/outputs/oxygen18/experiment2/pinn_oxygen18.pt
+[   0.7s]   Ocean model  : BarentsSeaOpening_adjusted_v_fulldepth.nc
+[   0.7s]   Target time  : 2004-06
+[   0.7s]   MC samples   : 100
+[   0.7s]   Output dir   : /gws/ssde/j25a/nemo/vol4/thopri/OceanTracerPINN/outputs/inference_BSO
+[   0.7s]   Seed         : 42
+[   0.7s] 
+[   0.7s] ── Loading checkpoint ──────────────────────────────────────
+  Checkpoint   : /gws/ssde/j25a/nemo/vol4/thopri/OceanTracerPINN/outputs/oxygen18/experiment2/pinn_oxygen18.pt
+  Architecture : hidden_dim=256, n_blocks=4, n_features=9
+  Features     : ['sigma0', 'spice', 'log_depth', 'lat_norm', 'lon_sin', 'lon_cos', 'log_speed', 'flow_sin', 'flow_cos']
+[   0.9s] 
+── Ocean model inference ────────────────────────────────────
+[   0.9s]   Directory : BarentsSeaOpening_adjusted_v_fulldepth.nc
+[   0.9s]   Target    : 2004-06
+[   1.3s]   Nearest time slice selected: 2004-10-15
+  [infer] Valid ocean points: 14,007 / 37,332 (37.5%)
+
+========== INFERENCE FEATURE DIAGNOSTICS ==========
+Feature names:
+   0: sigma0               raw min=      26.516 max=       27.98 mean=      27.593 std=     0.24807
+   1: spice                raw min=     -1.4125 max=      1.0676 mean=     0.48316 std=     0.49872
+   2: log_depth            raw min=           0 max=      6.1841 mean=      5.1774 std=      1.0246
+   3: lat_norm             raw min=     0.93656 max=     0.97704 mean=     0.95842 std=    0.011742
+   4: lon_sin              raw min=     0.31475 max=     0.34704 mean=     0.33093 std=   0.0093422
+   5: lon_cos              raw min=     0.93785 max=     0.94917 mean=      0.9436 std=   0.0032766
+   6: log_speed            raw min=  5.1204e-06 max=      0.1847 mean=    0.027452 std=    0.024147
+   7: flow_sin             raw min=     -0.4486 max=     0.44649 mean=  -0.0034246 std=     0.26435
+   8: flow_cos             raw min=    -0.90855 max=     0.90752 mean=   0.0042721 std=     0.55253
+
+Scaled features:
+   0: sigma0               min=     0.34105 max=      0.9111 mean=     0.76029 std=    0.096609
+   1: spice                min=     0.26188 max=      1.3757 mean=      1.1133 std=     0.22398
+   2: log_depth            min=     -2.6658 max=     0.81787 mean=     -0.1451 std=     0.67949
+   3: lat_norm             min=    -0.65013 max=     0.65361 mean=  -0.0081523 std=     0.29516
+   4: lon_sin              min=      1.1396 max=      1.1996 mean=      1.1729 std=    0.013607
+   5: lon_cos              min=      1.7277 max=      1.7433 mean=      1.7348 std=   0.0035454
+   6: log_speed            min=    -0.55051 max=      5.7352 mean=     0.38356 std=     0.82178
+   7: flow_sin             min=     -1.1503 max=      1.3159 mean=    0.060562 std=      1.1889
+   8: flow_cos             min=     -1.3285 max=       1.188 mean=   -0.053769 std=      1.2499
+
+Scaler:
+  mean : [ 2.56404195e+01 -1.99561522e+00  4.73226155e+00  9.56743695e-01
+ -2.98489116e-01 -3.12431518e-01  1.61812048e-02 -3.11072317e-02
+  5.01891282e-02]
+  scale: [2.56774538 2.22660291 1.77520492 0.03104935 0.53812981 0.72367611
+ 0.02938378 0.36293074 0.72166122]
+====================================================
+
+
+========== MODEL OUTPUT CHECK ==========
+min  = -0.535645
+max  = 0.881348
+mean = 0.254825
+std  = 0.081763
+========================================
+Traceback (most recent call last):
+  File "/gws/ssde/j25a/nemo/vol4/thopri/OceanTracerPINN/infer.py", line 208, in <module>
+    main(cfg_path=args.config,model_year=args.year,model_month=args.month)
+    ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/gws/ssde/j25a/nemo/vol4/thopri/OceanTracerPINN/infer.py", line 78, in main
+    ds_out = infer_on_model_field(
+        cfg,
+    ...<7 lines>...
+        n_mc=cfg['mc_samples']
+    )
+  File "/gws/ssde/j25a/nemo/vol4/thopri/OceanTracerPINN/inference/inference.py", line 403, in infer_on_model_field
+    if temp_3d.ndim == 2 and temp_3d.sizes[cfg['lat_dim']] == 1:
+                             ^^^^^^^^^^^^^
+AttributeError: 'numpy.ndarray' object has no attribute 'sizes'. Did you mean: 'size'?
+ERROR: Inference failed for Year: 2004, Month: 06 — skipping.
+Running inference for Year: 2004, Month: 07
+[   0.5s] Loading config from: config/inference/infer_BSO.yml
+[   0.7s] 
+============================================================
+[   0.7s]  PINN Tracer Inference
+[   0.7s] ============================================================
+[   0.7s]   Device       : cuda
+[   0.7s]   Checkpoint   : /gws/ssde/j25a/nemo/vol4/thopri/OceanTracerPINN/outputs/oxygen18/experiment2/pinn_oxygen18.pt
+[   0.7s]   Ocean model  : BarentsSeaOpening_adjusted_v_fulldepth.nc
+[   0.7s]   Target time  : 2004-07
+[   0.7s]   MC samples   : 100
+[   0.7s]   Output dir   : /gws/ssde/j25a/nemo/vol4/thopri/OceanTracerPINN/outputs/inference_BSO
+[   0.7s]   Seed         : 42
+[   0.7s] 
+[   0.7s] ── Loading checkpoint ──────────────────────────────────────
+  Checkpoint   : /gws/ssde/j25a/nemo/vol4/thopri/OceanTracerPINN/outputs/oxygen18/experiment2/pinn_oxygen18.pt
+  Architecture : hidden_dim=256, n_blocks=4, n_features=9
+  Features     : ['sigma0', 'spice', 'log_depth', 'lat_norm', 'lon_sin', 'lon_cos', 'log_speed', 'flow_sin', 'flow_cos']
+[   0.9s] 
+── Ocean model inference ────────────────────────────────────
+[   0.9s]   Directory : BarentsSeaOpening_adjusted_v_fulldepth.nc
+[   0.9s]   Target    : 2004-07
+[   1.3s]   Nearest time slice selected: 2004-10-15
+  [infer] Valid ocean points: 14,007 / 37,332 (37.5%)
+
+========== INFERENCE FEATURE DIAGNOSTICS ==========
+Feature names:
+   0: sigma0               raw min=      26.516 max=       27.98 mean=      27.593 std=     0.24807
+   1: spice                raw min=     -1.4125 max=      1.0676 mean=     0.48316 std=     0.49872
+   2: log_depth            raw min=           0 max=      6.1841 mean=      5.1774 std=      1.0246
+   3: lat_norm             raw min=     0.93656 max=     0.97704 mean=     0.95842 std=    0.011742
+   4: lon_sin              raw min=     0.31475 max=     0.34704 mean=     0.33093 std=   0.0093422
+   5: lon_cos              raw min=     0.93785 max=     0.94917 mean=      0.9436 std=   0.0032766
+   6: log_speed            raw min=  5.1204e-06 max=      0.1847 mean=    0.027452 std=    0.024147
+   7: flow_sin             raw min=     -0.4486 max=     0.44649 mean=  -0.0034246 std=     0.26435
+   8: flow_cos             raw min=    -0.90855 max=     0.90752 mean=   0.0042721 std=     0.55253
+
+Scaled features:
+   0: sigma0               min=     0.34105 max=      0.9111 mean=     0.76029 std=    0.096609
+   1: spice                min=     0.26188 max=      1.3757 mean=      1.1133 std=     0.22398
+   2: log_depth            min=     -2.6658 max=     0.81787 mean=     -0.1451 std=     0.67949
+   3: lat_norm             min=    -0.65013 max=     0.65361 mean=  -0.0081523 std=     0.29516
+   4: lon_sin              min=      1.1396 max=      1.1996 mean=      1.1729 std=    0.013607
+   5: lon_cos              min=      1.7277 max=      1.7433 mean=      1.7348 std=   0.0035454
+   6: log_speed            min=    -0.55051 max=      5.7352 mean=     0.38356 std=     0.82178
+   7: flow_sin             min=     -1.1503 max=      1.3159 mean=    0.060562 std=      1.1889
+   8: flow_cos             min=     -1.3285 max=       1.188 mean=   -0.053769 std=      1.2499
+
+Scaler:
+  mean : [ 2.56404195e+01 -1.99561522e+00  4.73226155e+00  9.56743695e-01
+ -2.98489116e-01 -3.12431518e-01  1.61812048e-02 -3.11072317e-02
+  5.01891282e-02]
+  scale: [2.56774538 2.22660291 1.77520492 0.03104935 0.53812981 0.72367611
+ 0.02938378 0.36293074 0.72166122]
+====================================================
+
+
+========== MODEL OUTPUT CHECK ==========
+min  = -0.535645
+max  = 0.881348
+mean = 0.254825
+std  = 0.081763
+========================================
+Traceback (most recent call last):
+  File "/gws/ssde/j25a/nemo/vol4/thopri/OceanTracerPINN/infer.py", line 208, in <module>
+    main(cfg_path=args.config,model_year=args.year,model_month=args.month)
+    ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/gws/ssde/j25a/nemo/vol4/thopri/OceanTracerPINN/infer.py", line 78, in main
+    ds_out = infer_on_model_field(
+        cfg,
+    ...<7 lines>...
+        n_mc=cfg['mc_samples']
+    )
+  File "/gws/ssde/j25a/nemo/vol4/thopri/OceanTracerPINN/inference/inference.py", line 403, in infer_on_model_field
+    if temp_3d.ndim == 2 and temp_3d.sizes[cfg['lat_dim']] == 1:
+                             ^^^^^^^^^^^^^
+AttributeError: 'numpy.ndarray' object has no attribute 'sizes'. Did you mean: 'size'?
+ERROR: Inference failed for Year: 2004, Month: 07 — skipping.
+Running inference for Year: 2004, Month: 08
+[2026-09-03T14:39:43.416] error: *** JOB 49298939 ON gpuhost003 CANCELLED AT 2026-09-03T14:39:43 DUE to SIGNAL Terminated ***

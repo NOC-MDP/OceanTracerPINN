@@ -9,3 +9,12 @@ inference:
   output_dir: "/gws/ssde/j25a/nemo/vol4/thopri/OceanTracerPINN/outputs/inference"
   mc_samples: 100
   checkpoint: "/gws/ssde/j25a/nemo/vol4/thopri/OceanTracerPINN/outputs/oxygen18/experiment2/pinn_oxygen18.pt"
+  depth_dim: "depth"
+  lat_dim: "latitude"
+  lon_dim: "longitude"
+  v_var: "vo"
+  u_var: "uo"
+  salt: "so"
+  temp: "thetao"
+  conservativeT: false
+  absoluteS: false

@@ -68,6 +68,7 @@ def load_checkpoint(path, device):
     return model, scaler, feat_names
 
 def infer_on_model_field(
+    cfg,
     ds,
     model,
     scaler,
@@ -82,86 +83,116 @@ def infer_on_model_field(
     Run the trained PINN on a gridded ocean model Dataset.
     """
 
-    # ── Candidate variable names ───────────────────────────────────────────────
-    _TEMP_VARS = ["temp", "temperature", "thetao", "votemper", "potential_temperature", "THETA"]
-    _SALT_VARS = ["salinity", "salt", "so", "vosaline", "practical_salinity", "SALT"]
-    _UVEL_VARS = ["vxo", "EVEL"]
-    _VVEL_VARS = ["vyo", "NVEL"]
-    _DEPTH_NAMES = ["depth", "deptht", "depthu", "depthv", "Z", "z", "lev", "level"]
-    _LAT_NAMES = ["lat", "latitude", "nav_lat", "yt_ocean", "nlat", "y"]
-    _LON_NAMES = ["lon", "longitude", "nav_lon", "xt_ocean", "nlon", "x"]
-    _TIME_NAMES = ["time", "time_counter", "t", "time_0", "time_centered"]
+    # # ── Candidate variable names ───────────────────────────────────────────────
+    # _TEMP_VARS = ["temp", "temperature", "thetao", "votemper", "potential_temperature", "THETA"]
+    # _SALT_VARS = ["salinity", "salt", "so", "vosaline", "practical_salinity", "SALT"]
+    # _UVEL_VARS = ["vxo", "EVEL"]
+    # _VVEL_VARS = ["vyo", "NVEL"]
+    # _DEPTH_NAMES = ["depth", "deptht", "depthu", "depthv", "Z", "z", "lev", "level"]
+    # _LAT_NAMES = ["lat", "latitude", "nav_lat", "yt_ocean", "nlat", "y"]
+    # _LON_NAMES = ["lon", "longitude", "nav_lon", "xt_ocean", "nlon", "x"]
+    # _TIME_NAMES = ["time", "time_counter", "t", "time_0", "time_centered"]
 
-    def _find_var(ds, candidates, label):
-        low = {v.lower(): v for v in ds.data_vars}
-        for c in candidates:
-            if c.lower() in low:
-                return low[c.lower()]
-        raise ValueError(
-            f"Cannot find {label} variable. "
-            f"Available: {list(ds.data_vars)}. "
-            f"Pass {label.lower()}_var='your_name' to override."
-        )
+    # def _find_var(ds, candidates, label):
+    #     low = {v.lower(): v for v in ds.data_vars}
+    #     for c in candidates:
+    #         if c.lower() in low:
+    #             return low[c.lower()]
+    #     raise ValueError(
+    #         f"Cannot find {label} variable. "
+    #         f"Available: {list(ds.data_vars)}. "
+    #         f"Pass {label.lower()}_var='your_name' to override."
+    #     )
 
-    def _find_dim(da, candidates, label):
-        low = {d.lower(): d for d in da.dims}
-        for c in candidates:
-            if c.lower() in low:
-                return low[c.lower()]
-        raise ValueError(f"Cannot find {label} dimension in {list(da.dims)}.")
+    # def _find_dim(da, candidates, label):
+    #     low = {d.lower(): d for d in da.dims}
+    #     for c in candidates:
+    #         if c.lower() in low:
+    #             return low[c.lower()]
+    #     raise ValueError(f"Cannot find {label} dimension in {list(da.dims)}.")
 
     def _to_3d(da, dep_dim, lat_dim, lon_dim):
-        """Squeeze extra dims then transpose to (D, Y, X)."""
-        extra = [d for d in da.dims if d not in {dep_dim, lat_dim, lon_dim}]
+        """Squeeze extra dims then transpose to available spatial dims (handles 2D transects or 3D grids)."""
+        # Filter out None values and only keep dimensions that actually exist in the DataArray
+        target_dims = [d for d in [dep_dim, lat_dim, lon_dim] if d is not None and d in da.dims]
+
+        # Squeeze any extra dimensions (like remaining time dimensions)
+        extra = [d for d in da.dims if d not in target_dims]
         for d in extra:
             da = da.isel({d: 0}) if da.sizes[d] > 1 else da.squeeze(d)
-        return da.transpose(dep_dim, lat_dim, lon_dim).values
 
-    # ── Variable detection ────────────────────────────────────────────────────
-    temp_var = _find_var(ds, _TEMP_VARS, "temperature")
-    salt_var = _find_var(ds, _SALT_VARS, "salinity")
-    uvel_var = _find_var(ds, _UVEL_VARS, "u-velocity")
-    vvel_var = _find_var(ds, _VVEL_VARS, "v-velocity")
-    print(f"  [infer] temp='{temp_var}', salt='{salt_var}', u='{uvel_var}', v='{vvel_var}'")
+        # Transpose dynamically to whatever spatial dimensions are present
+        return da.transpose(*target_dims).values
 
-    # ── Dimension detection ───────────────────────────────────────────────────
-    ref = ds[temp_var]
-    dep_dim = _find_dim(ref, _DEPTH_NAMES, "depth")
-    lat_dim = _find_dim(ref, _LAT_NAMES, "latitude")
-    lon_dim = _find_dim(ref, _LON_NAMES, "longitude")
+    # # ── Variable detection ────────────────────────────────────────────────────
+    # temp_var = _find_var(ds, _TEMP_VARS, "temperature")
+    # salt_var = _find_var(ds, _SALT_VARS, "salinity")
+    # uvel_var = _find_var(ds, _UVEL_VARS, "u-velocity")
+    # vvel_var = _find_var(ds, _VVEL_VARS, "v-velocity")
+    # print(f"  [infer] temp='{temp_var}', salt='{salt_var}', u='{uvel_var}', v='{vvel_var}'")
 
-    # Handle time
-    time_dim = next((d for d in _TIME_NAMES if d in ref.dims), None)
-    if time_dim and ref.sizes[time_dim] > 1:
-        print(f"  [infer] Slicing time index {target_time_index} from dim '{time_dim}' (size {ref.sizes[time_dim]})")
-        ds = ds.isel({time_dim: target_time_index})
-        ref = ds[temp_var]
+    # # # ── Dimension detection ───────────────────────────────────────────────────
+    # ref = ds[cfg['temp_var']]
+    # print(ref)
+    # # dep_dim = _find_dim(ref, _DEPTH_NAMES, "depth")
+    # # lat_dim = _find_dim(ref, _LAT_NAMES, "latitude")
+    # # lon_dim = _find_dim(ref, _LON_NAMES, "longitude")
+
+    # # Handle time
+    # # time_dim = next((d for d in _TIME_NAMES if d in ref.dims), None)
+    # if cfg['time_dim'] and ref.sizes[cfg['time_dim']] > 1:
+    #     print(f"  [infer] Slicing time index {target_time_index} from dim '{cfg['time_dim']}' (size {ref.sizes[cfg['time_dim']]})")
+    #     ds = ds.isel({cfg['time_dim']: target_time_index})
+    #     ref = ds[cfg['temp_var']]
 
     # ── Extract 3-D arrays ────────────────────────────────────────────────────
-    temp_3d = _to_3d(ds[temp_var], dep_dim, lat_dim, lon_dim)
-    salt_3d = _to_3d(ds[salt_var], dep_dim, lat_dim, lon_dim)
-    u_3d = _to_3d(ds[uvel_var], dep_dim, lat_dim, lon_dim)
-    v_3d = _to_3d(ds[vvel_var], dep_dim, lat_dim, lon_dim)
-
-    n_dep, n_lat, n_lon = temp_3d.shape
-
-    # Depth, lat, lon grids
-    depth_vals = (
-        np.abs(ds.coords[dep_dim].values)
-        if dep_dim in ds.coords
-        else np.arange(n_dep, dtype=float)
-    )
-    lat_1d = ds.coords[lat_dim].values if lat_dim in ds.coords else np.zeros(n_lat)
-    lon_1d = ds.coords[lon_dim].values if lon_dim in ds.coords else np.zeros(n_lon)
-
-    if lat_1d.ndim == 2:  # curvilinear grid
-        lat_3d = np.broadcast_to(lat_1d[np.newaxis], temp_3d.shape).copy()
-        lon_3d = np.broadcast_to(lon_1d[np.newaxis], temp_3d.shape).copy()
+    temp_3d = _to_3d(ds[cfg['temp_var']], cfg['dep_dim'], cfg['lat_dim'], cfg['lon_dim'])
+    salt_3d = _to_3d(ds[cfg['salt_var']], cfg['dep_dim'], cfg['lat_dim'], cfg['lon_dim'])
+    v_3d = _to_3d(ds[cfg['v_var']],cfg['dep_dim'], cfg['lat_dim'], cfg['lon_dim'])
+    if cfg['u_var'] is None:
+        u_3d = np.zeros_like(v_3d)
     else:
-        lat_3d = np.broadcast_to(lat_1d[np.newaxis, :, np.newaxis], temp_3d.shape).copy()
-        lon_3d = np.broadcast_to(lon_1d[np.newaxis, np.newaxis, :], temp_3d.shape).copy()
+        u_3d = _to_3d(ds[cfg['u_var']], cfg['dep_dim'], cfg['lat_dim'], cfg['lon_dim'])
 
-    depth_3d = np.broadcast_to(depth_vals[:, np.newaxis, np.newaxis], temp_3d.shape).copy()
+
+    if temp_3d.ndim == 3:
+        n_dep, n_lat, n_lon = temp_3d.shape
+    elif temp_3d.ndim == 2:
+        n_dep, n_lon = temp_3d.shape
+        n_lat = 1  # Dummy or singleton size for latitude if needed downstream
+
+    depth_vals = ds[cfg['dep_dim']].values
+
+    if temp_3d.ndim == 2:
+        # --- 2D TRANSECT CASE (Depth x Lon) ---
+        n_dep, n_lon = temp_3d.shape
+
+        # Broadcast depth and lon to 2D
+        depth_3d = np.broadcast_to(depth_vals[:, np.newaxis], temp_3d.shape).copy()
+
+        lon_1d = ds.coords[cfg['lon_dim']].values if cfg['lon_dim'] in ds.coords else np.arange(n_lon)
+        lon_3d = np.broadcast_to(lon_1d[np.newaxis, :], temp_3d.shape).copy()
+
+        # Handle scalar latitude for the transect
+        lat_val = ds.coords[cfg['lat_dim']].values if cfg['lat_dim'] in ds.coords else 0.0
+        lat_3d = np.full(temp_3d.shape, lat_val)
+
+    else:
+        # --- 3D GRID CASE (Depth x Lat x Lon) ---
+        n_dep, n_lat, n_lon = temp_3d.shape
+
+        depth_3d = np.broadcast_to(depth_vals[:, np.newaxis, np.newaxis], temp_3d.shape).copy()
+
+        lat_1d = ds.coords[cfg['lat_dim']].values if cfg['lat_dim'] in ds.coords else np.zeros(n_lat)
+        lon_1d = ds.coords[cfg['lon_dim']].values if cfg['lon_dim'] in ds.coords else np.zeros(n_lon)
+
+        if lat_1d.ndim == 2:  # curvilinear grid
+            lat_3d = np.broadcast_to(lat_1d[np.newaxis], temp_3d.shape).copy()
+            lon_3d = np.broadcast_to(lon_1d[np.newaxis], temp_3d.shape).copy()
+        else:
+            lat_3d = np.broadcast_to(lat_1d[np.newaxis, :, np.newaxis], temp_3d.shape).copy()
+            lon_3d = np.broadcast_to(lon_1d[np.newaxis, np.newaxis, :], temp_3d.shape).copy()
+
 
     # ── Define Target Polar Stereographic Projection (EPSG:3413) ──────────────
     lon_0 = -45.0
@@ -187,8 +218,14 @@ def infer_on_model_field(
 
     # ── TEOS-10 ───────────────────────────────────────────────────────────────
     p_flat = gsw.p_from_z(-z_flat, lat_f)
-    SA = gsw.SA_from_SP(S_flat, p_flat, lon_f, lat_f)
-    CT = gsw.CT_from_pt(SA, T_flat)
+    if not cfg['conservativeT']:
+        SA = gsw.SA_from_SP(S_flat, p_flat, lon_f, lat_f)
+    else:
+        SA = S_flat
+    if not cfg['absoluteS']:
+        CT = gsw.CT_from_pt(SA,T_flat)
+    else:
+        CT = T_flat
     sigma0 = gsw.sigma0(SA, CT)
     spice = gsw.spiciness0(SA, CT)
     sigma2 = gsw.sigma2(SA, CT)
@@ -363,12 +400,33 @@ def infer_on_model_field(
     uncert_field[valid] = tracer_std
 
     # ── Output Dataset ────────────────────────────────────────────────────────
-    out_dims = (dep_dim, lat_dim, lon_dim)
-    out_coords = {
-        dep_dim: ds.coords.get(dep_dim, np.arange(n_dep)),
-        lat_dim: ds.coords.get(lat_dim, np.arange(n_lat)),
-        lon_dim: ds.coords.get(lon_dim, np.arange(n_lon)),
-    }
+    if temp_3d.ndim == 2:
+        # Treat 2D transect as 3D with a singleton latitude dimension of size 1
+        n_lat = 1
+        out_dims = (cfg['dep_dim'], cfg['lat_dim'], cfg['lon_dim'])
+
+        # Extract the scalar latitude value (or default to 0.0) and make it a 1D list/array
+        lat_val = ds.coords[cfg['lat_dim']].values.item() if cfg['lat_dim'] in ds.coords else 0.0
+
+        out_coords = {
+            cfg['dep_dim']: ds.coords.get(cfg['dep_dim'], np.arange(n_dep)),
+            cfg['lat_dim']: [lat_val],  # 1D coordinate of size 1 matching the dimension
+            cfg['lon_dim']: ds.coords.get(cfg['lon_dim'], np.arange(n_lon)),
+        }
+    else:
+        # 3D Grid Case (Depth x Lat x Lon)
+        out_dims = (cfg['dep_dim'], cfg['lat_dim'], cfg['lon_dim'])
+        out_coords = {
+            cfg['dep_dim']: ds.coords.get(cfg['dep_dim'], np.arange(n_dep)),
+            cfg['lat_dim']: ds.coords.get(cfg['lat_dim'], np.arange(n_lat)),
+            cfg['lon_dim']: ds.coords.get(cfg['lon_dim'], np.arange(n_lon)),
+        }
+
+    # netcdf attributes can't be None so convert to String None
+    if cfg['u_var'] is None:
+        u_var_used = "None"
+    else:
+        u_var_used = cfg['u_var']
 
     ds_out = xr.Dataset(
         {
@@ -380,10 +438,10 @@ def infer_on_model_field(
             "description": "PINN tracer inference with velocity loss",
             "target_year": target_year,
             "target_month": target_month,
-            "temp_var_used": temp_var,
-            "salt_var_used": salt_var,
-            "uvel_var_used": uvel_var,
-            "vvel_var_used": vvel_var,
+            "temp_var_used": cfg['temp_var'],
+            "salt_var_used": cfg['salt_var'],
+            "u_var_used": u_var_used,
+            "v_var_used": cfg['v_var'],
         },
     )
     return ds_out

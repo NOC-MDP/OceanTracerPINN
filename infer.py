@@ -76,6 +76,7 @@ def main(cfg_path,model_year,model_month):
 
 
     ds_out = infer_on_model_field(
+        cfg,
         ds,
         model,
         scaler,

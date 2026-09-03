@@ -18,10 +18,10 @@ import cmocean
 import glob
 
 cfg = {
-    "work_dir":"outputs/inference/netcdf",
-    "mw_output_path" : "arctic_meteoric_inventory_TOPAZ_1991_2025.nc",
-    "sim_output_path" : "arctic_seaicemelt_inventory_TOPAZ_1991_2025.nc",
-    "frac_output_path" : "arctic_fractions_TOPAZ_1991_2025.nc",
+    "work_dir":"outputs/anomaly/images",
+    "mw_output_path" : "outputs/inventory/netcdf/arctic_meteoric_inventory_TOPAZ4_1991_2025.nc",
+    "sim_output_path" : "outputs/inventory/netcdf/arctic_seaicemelt_inventory_TOPAZ4_1991_2025.nc",
+    "frac_output_path" : "outputs/inventory/netcdf/arctic_fractions_TOPAZ4_1991_2025.nc",
     "ML_model_dir": "outputs/oxygen18/experiment1",
     "inference_target": "/work/scratch-pw5/thopri/cmems_mod_arc_phy_my_topaz4_P1M_multi-vars_180.00W-179.88E_50.00N-90.00N_0.00-4000.00m_1991-01-01-2026-04-01.nc",
     "baseline_start": "1991",
@@ -59,7 +59,7 @@ def main():
     # --- 7. PLOTTING ANOMALY MAP ---
 
     log_status("Loading generated inventory file for plotting...")
-    ds_map = xr.open_dataset(f"{cfg['work_dir']}/{cfg['mw_output_path']}")
+    ds_map = xr.open_dataset(f"{cfg['mw_output_path']}")
 
     log_status("Computing baseline vs recent climatology values and uncertainties...")
 
@@ -156,7 +156,7 @@ def main():
     )
 
     plt.tight_layout()
-    plot_output = "arctic_meteoric_anomaly_map.png"
+    plot_output = f"{cfg['work_dir']}/arctic_meteoric_anomaly_map.png"
     plt.savefig(plot_output, bbox_inches="tight")
     plt.show()
     log_status(f"Map plotted and saved to: {plot_output}")
@@ -165,7 +165,7 @@ def main():
     # --- 7. PLOTTING ANOMALY MAP ---
     ##################################
     log_status("Loading generated inventory file for plotting...")
-    ds_map = xr.open_dataset(f"{cfg['work_dir']}/{cfg['sim_output_path']}")
+    ds_map = xr.open_dataset(f"{cfg['sim_output_path']}")
 
     log_status("Computing baseline vs recent climatology values and uncertainties...")
 
@@ -255,7 +255,7 @@ def main():
     )
 
     plt.tight_layout()
-    plot_output = "arctic_seaicemelt_anomaly_map.png"
+    plot_output = f"{cfg['work_dir']}/arctic_seaicemelt_anomaly_map.png"
     plt.savefig(plot_output, bbox_inches="tight")
     plt.show()
     log_status(f"Map plotted and saved to: {plot_output}")
@@ -387,14 +387,15 @@ def main():
     print(f"Dask Dashboard link for flux calc monitoring: {flux_client.dashboard_link}")
 
     chunks = {"time": 1}
-    ds_frac = xr.open_dataset(f"{cfg['work_dir']}/{cfg['frac_output_path']}", chunks=chunks)
-    ecco_paths2 = glob.glob(os.path.join(cfg['inference_target'], "*.nc"))
-    log_status("Loading ECCO v4r4 dataset lazily...")
+    ds_frac = xr.open_dataset(f"{cfg['frac_output_path']}", chunks=chunks)
+    # ecco_paths2 = glob.glob(os.path.join(cfg['inference_target'], "*.nc"))
+    # log_status("Loading ECCO v4r4 dataset lazily...")
 
-    ds_v = xr.open_mfdataset(
-        ecco_paths2, combine='by_coords', data_vars='minimal', coords='minimal',
-        compat='override', join='override', chunks=chunks,
-    )
+    # ds_v = xr.open_mfdataset(
+    #     ecco_paths2, combine='by_coords', data_vars='minimal', coords='minimal',
+    #     compat='override', join='override', chunks=chunks,
+    # )
+    ds_v = xr.open_dataset(cfg['inference_target'],chunks=chunks)
 
     # How far (in degrees) to pad around each transect's lat/lon box before
     # interpolating. Subsetting to this small window first means the "single
@@ -444,18 +445,37 @@ def main():
 
         f_sim_trans = ds_frac_sub["f_sim"].interp(latitude=da_lats, longitude=da_lons)
         f_met_trans = ds_frac_sub["f_met"].interp(latitude=da_lats, longitude=da_lons)
-        vxo_trans = ds_v_sub["EVEL"].interp(latitude=da_lats, longitude=da_lons)
-        vyo_trans = ds_v_sub["NVEL"].interp(latitude=da_lats, longitude=da_lons)
+        vxo_trans = ds_v_sub["vxo"].interp(latitude=da_lats, longitude=da_lons)
+        vyo_trans = ds_v_sub["vyo"].interp(latitude=da_lats, longitude=da_lons)
 
-        # 1. Compute exact layer thicknesses (dz) from Z_bnds
-        # Z_bnds has shape (len(Z), 2) for lower and upper layer interfaces
-        dz_values = np.abs(ds_v_sub["Z_bnds"][:, 1] - ds_v_sub["Z_bnds"][:, 0]).values
+        # # 1. Compute exact layer thicknesses (dz) from Z_bnds
+        # # Z_bnds has shape (len(Z), 2) for lower and upper layer interfaces
+        # dz_values = np.abs(ds_v_sub["Z_bnds"][:, 1] - ds_v_sub["Z_bnds"][:, 0]).values
 
-        # 2. Package into a DataArray aligned with coordinate Z
-        dz2 = xr.DataArray(dz_values, coords={"Z": ds_v_sub["Z"]}, dims=["Z"])
+        # # 2. Package into a DataArray aligned with coordinate Z
+        # dz2 = xr.DataArray(dz_values, coords={"Z": ds_v_sub["Z"]}, dims=["Z"])
 
-        # 3. Select matching depths for your transect
-        dz_trans = dz2.sel(Z=f_sim_trans["Z"])
+        # # 3. Select matching depths for your transect
+        # dz_trans = dz2.sel(Z=f_sim_trans["Z"])
+
+        # 1. Extract depth array from the TOPAZ dataset (typically named 'depth')
+        depths = ds_v_sub["depth"].values
+
+        # 2. Compute interface boundaries between adjacent layers
+        # Midpoints between consecutive depth levels
+        interfaces = (depths[:-1] + depths[1:]) / 2.0
+
+        # Define full boundaries including surface (0) and bottom interface
+        bounds = np.concatenate(([0.0], interfaces, [depths[-1] + (depths[-1] - interfaces[-1])]))
+
+        # 3. Calculate layer thicknesses (dz = bottom_bound - top_bound)
+        dz_values = np.diff(bounds)
+
+        # 4. Package into an xarray DataArray matching TOPAZ coordinates
+        dz2 = xr.DataArray(dz_values, coords={"depth": ds_v_sub["depth"]}, dims=["depth"])
+
+        # 5. Select matching depths for your interpolated transect
+        dz_trans = dz2.sel(depth=f_sim_trans["depth"])
 
         log_status(f"[{t_name}] Projecting velocity vectors perpendicular to transect...")
 
@@ -465,7 +485,7 @@ def main():
 
         sim_cell_flux_m3s = v_normal * f_sim_trans * dz_trans * da_ds * -1
 
-        sim_total_flux_m3s = sim_cell_flux_m3s.sum(dim=["Z", "segment"])
+        sim_total_flux_m3s = sim_cell_flux_m3s.sum(dim=["depth", "segment"])
         sim_flux_mSv = sim_total_flux_m3s / 1000.0 * -1
         sim_flux_mSv.name = f"seaicemelt_flux_{t_name}"
         sim_flux_mSv.attrs["units"] = "mSv"
@@ -475,7 +495,7 @@ def main():
 
         met_cell_flux_m3s = v_normal * f_met_trans * dz_trans * da_ds
 
-        met_total_flux_m3s = met_cell_flux_m3s.sum(dim=["Z", "segment"])
+        met_total_flux_m3s = met_cell_flux_m3s.sum(dim=["depth", "segment"])
         met_flux_mSv = met_total_flux_m3s / 1000.0 * -1
         met_flux_mSv.name = f"met_flux_{t_name}"
         met_flux_mSv.attrs["units"] = "mSv"

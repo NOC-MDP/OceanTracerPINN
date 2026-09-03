@@ -13,14 +13,14 @@ import glob
 
 cfg = {
     "work_dir":"/gws/ssde/j25a/nemo/vol4/thopri/OceanTracerPINN",
-    "mw_output_path" : "outputs/inventory/netcdf/arctic_meteoric_inventory_TOPAZ4_1991_2025.nc",
-    "sim_output_path" : "outputs/inventory/netcdf/arctic_seaicemelt_inventory_TOPAZ4_1991_2025.nc",
-    "frac_output_path" : "outputs/inventory/netcdf/arctic_fractions_TOPAZ4_1991_2025.nc",
-    "ML_model_dir": "outputs/inference/netcdf",
-    "inventory_start": 1991,
-    "inventory_end": 2025,
-    "inference_target": "/work/scratch-pw5/thopri/cmems_mod_arc_phy_my_topaz4_P1M_multi-vars_180.00W-179.88E_50.00N-90.00N_0.00-4000.00m_1991-01-01-2026-04-01.nc",
-    "salinity": "so",
+    "mw_output_path" : "outputs/inventory/netcdf/arctic_meteoric_inventory_FRAM_2004_2024.nc",
+    "sim_output_path" : "outputs/inventory/netcdf/arctic_seaicemelt_inventory_FRAM_2004_2024.nc",
+    "frac_output_path" : "outputs/inventory/netcdf/arctic_fractions_FRAM_2004_2024.nc",
+    "ML_model_dir": "outputs/inference_fram/netcdf",
+    "inventory_start": 2004,
+    "inventory_end": 2024,
+    "inference_target": "/gws/ssde/j25a/nemo/vol4/thopri/OceanTracerPINN/FramStrait_adjusted_v_fulldepth.nc",
+    "salinity": "SA",
     "depth": "depth",
     "tracer_pred": "tracer_pred",
     "time": "time",
@@ -63,7 +63,7 @@ def main():
     end_year = cfg['inventory_end']
     model_years = [year for year in range(start_year, end_year + 1)]
     paths = []
-    ecco_paths = []
+    # ecco_paths = []
     for model_year in model_years:
         for i in range(12):
             paths.append(
@@ -72,7 +72,7 @@ def main():
 
 
     # --- 2. LOAD DATASETS WITH CHUNKS ---
-    chunks = {"time": 1, "depth": 10, "latitude": 250, "longitude": 250}
+    chunks = {"time": 1}
     # ecco_paths = ecco_paths + glob.glob(os.path.join(cfg['inference_target'], "*.nc"))
     log_status("Loading dataset lazily...")
     # Use glob to grab all NetCDF files in the folder
@@ -105,10 +105,10 @@ def main():
 
     # Create Baltic Mask
     is_baltic = (
-        (ds_s["latitude"] >= Baltic["lat_min"])
-        & (ds_s["latitude"] <= Baltic['lat_max'])
-        & (ds_s["longitude"] >= Baltic['lon_min'])
-        & (ds_s["longitude"] <= Baltic['lon_max'])
+        (ds_s["lat"] >= Baltic["lat_min"])
+        & (ds_s["lat"] <= Baltic['lat_max'])
+        & (ds_s["lon"] >= Baltic['lon_min'])
+        & (ds_s["lon"] <= Baltic['lon_max'])
     )
 
     # 2. Define the boundary for the North Pacific / Bering Sea
@@ -118,8 +118,8 @@ def main():
 
     # In a -180 to 180 longitude setup, the North Pacific covers:
     # From 140°E (which is 140) to -120°W (which is -120)
-    is_pacific = (ds_s["latitude"] < pacific_lat_max) & (
-        (ds_s["longitude"] >= Pacific['lon_max']) | (ds_s["longitude"] <= Pacific['lon_min'])
+    is_pacific = (ds_s["lat"] < pacific_lat_max) & (
+        (ds_s["lon"] >= Pacific['lon_max']) | (ds_s["lon"] <= Pacific['lon_min'])
     )
 
     # 3. Combine masks: We want data where it is NOT Baltic and NOT Pacific
@@ -246,6 +246,7 @@ def main():
     log_status("Dask computation completed successfully!")
 
     # --- 7. SAVE TO DISK ---
+    log_status("Saving computation to disk...")
     ds.to_netcdf(f"{cfg['work_dir']}/{cfg['frac_output_path']}")
     log_status(f"Saved meteoric and seaicemet fractions to: {cfg['frac_output_path']}")
     mw_ds.to_netcdf(f"{cfg['work_dir']}/{cfg['mw_output_path']}")
@@ -257,6 +258,7 @@ def main():
 
     client.close()
     cluster.close()
+    log_status("Inventory creation complete.")
 
 if __name__ == "__main__":
     main()

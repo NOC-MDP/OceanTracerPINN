@@ -1,0 +1,49 @@
+netcdf tracer_predicted_1992_01 {
+dimensions:
+	depth = 40 ;
+	latitude = 321 ;
+	longitude = 2880 ;
+variables:
+	double tracer_pred(depth, latitude, longitude) ;
+		tracer_pred:_FillValue = NaN ;
+		tracer_pred:coordinates = "time" ;
+	double tracer_uncertainty(depth, latitude, longitude) ;
+		tracer_uncertainty:_FillValue = NaN ;
+		tracer_uncertainty:coordinates = "time" ;
+	float depth(depth) ;
+		depth:_FillValue = NaNf ;
+		depth:positive = "down" ;
+		depth:units = "m" ;
+		depth:long_name = "Depth" ;
+		depth:standard_name = "depth" ;
+		depth:axis = "Z" ;
+	double time ;
+		time:_FillValue = NaN ;
+		time:axis = "T" ;
+		time:unit_long = "Hour Since 1950-01-01T00:00:00+00:00" ;
+		time:long_name = "Time" ;
+		time:standard_name = "time" ;
+		time:units = "hours since 1950-01-01T00:00:00+00:00" ;
+		time:calendar = "proleptic_gregorian" ;
+	double latitude(latitude) ;
+		latitude:_FillValue = NaN ;
+		latitude:axis = "Y" ;
+		latitude:units = "degrees_north" ;
+		latitude:long_name = "Latitude" ;
+		latitude:standard_name = "latitude" ;
+	double longitude(longitude) ;
+		longitude:_FillValue = NaN ;
+		longitude:axis = "X" ;
+		longitude:units = "degrees_east" ;
+		longitude:long_name = "Longitude" ;
+		longitude:standard_name = "longitude" ;
+
+// global attributes:
+		:description = "PINN tracer inference with velocity loss" ;
+		:target_year = 1992LL ;
+		:target_month = 1LL ;
+		:temp_var_used = "thetao" ;
+		:salt_var_used = "so" ;
+		:uvel_var_used = "vxo" ;
+		:vvel_var_used = "vyo" ;
+}

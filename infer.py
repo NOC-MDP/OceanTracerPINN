@@ -74,7 +74,6 @@ def main(cfg_path,model_year,model_month):
     if "time" in ds.dims:
         ds = ds.squeeze("time")
 
-
     ds_out = infer_on_model_field(
         cfg,
         ds,

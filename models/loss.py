@@ -17,7 +17,7 @@ def jacobian_columns(model, x, col_indices):
 
 def physics_losses(model, x_batch, feature_names, u_raw, v_raw):
     """
-    Five physics-informed loss terms with safe autograd graph tracking and NaN assertions.
+    Three physics-informed loss terms with safe autograd graph tracking and NaN assertions.
     """
     # ── 0. Sanity Check Inputs ───────────────────────────────────────────────
     if torch.isnan(x_batch).any():

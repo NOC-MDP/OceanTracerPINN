@@ -11,8 +11,8 @@ export PYTHONUNBUFFERED=1
 micromamba activate AISIT2
 
 # Define year range
-START_YEAR=2004
-END_YEAR=2024
+START_YEAR=2005
+END_YEAR=2023
 
 # Loop over all years and months
 for YEAR in $(seq $START_YEAR $END_YEAR); do
